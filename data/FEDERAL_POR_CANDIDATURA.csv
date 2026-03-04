@@ -1,0 +1,4 @@
+nombre_distribucion_voto,actor_politico,porcentaje_votacion,voto_actor_politico,total_votos,num_votos_nulos,porcentaje_votos_nulos,num_votos_can_nreg,porcentaje_can_nreg,casillas,secciones,municipios,distritos
+"Por Candidaturas","MC","10.1769473","16426.000","161404.000","3415.000","2.1158088","81.000","0.0501846","391","158","0","0"
+"Por Candidaturas","PAN_PRI_PRD","29.7570073","48029.000","161404.000","3415.000","2.1158088","81.000","0.0501846","391","158","0","0"
+"Por Candidaturas","PVEM_PT_MORENA","57.9000520","93453.000","161404.000","3415.000","2.1158088","81.000","0.0501846","391","158","0","0"
