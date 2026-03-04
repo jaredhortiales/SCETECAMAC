@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SCETECAMAC | Resultados Electorales</title>
+  <title>SCETECAMAC | Visor Electoral</title>
 
   <link rel="stylesheet" href="css/styles.css" />
 
@@ -20,7 +20,7 @@
       <div class="brand-dot"></div>
       <div>
         <div class="brand-title">SCETECAMAC</div>
-        <div class="brand-subtitle">Visor Electoral · Diputaciones Federales</div>
+        <div class="brand-subtitle">Visor Electoral · Resultados</div>
       </div>
     </div>
   </header>
@@ -29,60 +29,69 @@
     <section class="panel">
       <h1>Resultados Electorales</h1>
       <p class="muted">
-        Consulta por <b>Municipio</b> y posteriormente por <b>Distrito Federal</b>.
-        La tabla replica el formato de resultados y agrega <b>logotipo</b> por actor político.
+        Apartado inicial: <b>Diputaciones Federales</b>. Se muestran dos vistas:
+        <b>Por Partido</b> y <b>Por Candidatura</b>. Cada vista incluye tabla con logotipos
+        y su gráfica correspondiente.
       </p>
-
-      <div class="filters">
-        <div class="filter">
-          <label for="selNivel">Nivel</label>
-          <select id="selNivel">
-            <option value="municipio" selected>Municipio</option>
-            <option value="distrito">Distrito Federal</option>
-          </select>
-        </div>
-
-        <div class="filter">
-          <label for="selMunicipio">Municipio</label>
-          <select id="selMunicipio"></select>
-        </div>
-
-        <div class="filter">
-          <label for="selDistrito">Distrito Federal</label>
-          <select id="selDistrito" disabled></select>
-        </div>
-
-        <div class="filter filter-btn">
-          <button id="btnConsultar">Consultar</button>
-        </div>
-      </div>
     </section>
 
     <section class="panel">
       <div class="section-title">
-        <h2 id="tituloTabla">Tabla de Resultados</h2>
-        <div class="badge" id="badgeFuente">Diputaciones Federales</div>
+        <h2>Diputaciones Federales</h2>
+        <div class="badge">Resultados</div>
       </div>
 
-      <div class="cards" id="cardsResumen"></div>
-
-      <div class="table-wrap">
-        <table class="results">
-          <thead>
-            <tr>
-              <th>Logo</th>
-              <th>Actor Político</th>
-              <th class="num">Votos</th>
-              <th class="num">% de la votación</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyResultados"></tbody>
-        </table>
+      <div class="tabs">
+        <button class="tab active" id="tabPartido" type="button">Federal · Por Partido</button>
+        <button class="tab" id="tabCandidatura" type="button">Federal · Por Candidatura</button>
       </div>
 
-      <div class="chart-wrap">
-        <h3>Gráfica (Votos por Actor Político)</h3>
-        <canvas id="chartVotos" height="110"></canvas>
+      <!-- VISTA 1: POR PARTIDO -->
+      <div class="view" id="viewPartido">
+        <h3 class="view-title">Resultados por Partido</h3>
+
+        <div class="table-wrap">
+          <table class="results">
+            <thead>
+              <tr>
+                <th>Logo</th>
+                <th>Actor Político</th>
+                <th class="num">Votos</th>
+                <th class="num">% de la votación</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPartido"></tbody>
+          </table>
+        </div>
+
+        <div class="chart-wrap">
+          <h3>Gráfica (Votos por Partido)</h3>
+          <canvas id="chartPartido" height="110"></canvas>
+        </div>
+      </div>
+
+      <!-- VISTA 2: POR CANDIDATURA -->
+      <div class="view hidden" id="viewCandidatura">
+        <h3 class="view-title">Resultados por Candidatura</h3>
+
+        <div class="table-wrap">
+          <table class="results">
+            <thead>
+              <tr>
+                <th>Logo</th>
+                <th>Actor Político</th>
+                <th class="num">Votos</th>
+                <th class="num">% de la votación</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyCandidatura"></tbody>
+          </table>
+        </div>
+
+        <div class="chart-wrap">
+          <h3>Gráfica (Votos por Candidatura)</h3>
+          <canvas id="chartCandidatura" height="110"></canvas>
+        </div>
       </div>
     </section>
   </main>
@@ -92,6 +101,6 @@
   </footer>
 
   <script src="js/config_partidos.js"></script>
-  <script src="js/app_resultados.js"></script>
+  <script src="js/resultados_federales.js"></script>
 </body>
 </html>
