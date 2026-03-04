@@ -47,22 +47,70 @@ function getVal(row, keys){
   return "";
 }
 
-function toDataset(rows){
+/**
+ * Convierte filas del CSV a dataset de actores (PAN, MORENA, coaliciones, etc.)
+ * y extrae meta (totales, nulos, no registrados) si vienen en el archivo.
+ */
+function toDatasetWithMeta(rows){
   const out = [];
+  const meta = {
+    total_votos: null,
+    votos_nulos: null,
+    pct_nulos: null,
+    no_registrados: null,
+    pct_no_registrados: null,
+    casillas: null,
+    secciones: null
+  };
+
   for (const r of rows){
+    // Meta (son iguales en todas las filas; tomamos la primera disponible)
+    if (meta.total_votos === null) {
+      const tv = getVal(r, ["total_votos","Total Votos","total"]);
+      if (tv !== "") meta.total_votos = Number(tv);
+    }
+    if (meta.votos_nulos === null) {
+      const vn = getVal(r, ["num_votos_n","votos_nulos","Votos Nulos"]);
+      if (vn !== "") meta.votos_nulos = Number(vn);
+    }
+    if (meta.pct_nulos === null) {
+      const pn = getVal(r, ["porcentaje_votos_nulos","porcentaje_vn","porcentaje_v_n","porcentaje_v"]);
+      // En tu CSV, la columna de % nulos parece ser la que acompaña a num_votos_n.
+      // Si viene repetida como "porcentaje_v..." la tomamos.
+      if (pn !== "") meta.pct_nulos = Number(pn);
+    }
+    if (meta.no_registrados === null) {
+      const nr = getVal(r, ["num_votos_c","no_registrados","No Registrados"]);
+      if (nr !== "") meta.no_registrados = Number(nr);
+    }
+    if (meta.pct_no_registrados === null) {
+      const pnr = getVal(r, ["porcentaje_ca","porcentaje_no_registrados","porcentaje_nr"]);
+      if (pnr !== "") meta.pct_no_registrados = Number(pnr);
+    }
+    if (meta.casillas === null) {
+      const c = getVal(r, ["casillas"]);
+      if (c !== "") meta.casillas = Number(c);
+    }
+    if (meta.secciones === null) {
+      const s = getVal(r, ["secciones"]);
+      if (s !== "") meta.secciones = Number(s);
+    }
+
+    // Dataset por actor
     const actor = String(getVal(r, ["actor_politico","Actor Politico","Actor Político"])).trim();
     if (!actor || actor === "0") continue;
 
-    const votos = Number(getVal(r, ["voto_actor_politico","votos","Votos"])) || 0;
-    const pct = Number(getVal(r, ["porcentaje_votacion","porcentaje","%"])) || 0;
+    const votos = Number(getVal(r, ["voto_actor_politico","voto_actor_p","votos","Votos"])) || 0;
+    const pct = Number(getVal(r, ["porcentaje_votacion","porcentaje_vc","porcentaje_v","porcentaje"])) || 0;
 
     out.push({ actor, votos, pct });
   }
+
   out.sort((a,b) => b.votos - a.votos);
-  return out;
+  return { dataset: out, meta };
 }
 
-function renderTabla(dataset, tbodyId){
+function renderTabla(dataset, tbodyId, meta=null){
   const tbody = document.getElementById(tbodyId);
   tbody.innerHTML = "";
 
@@ -85,6 +133,24 @@ function renderTabla(dataset, tbodyId){
       <td class="num">${fmtPct(row.pct)}</td>
     `;
     tbody.appendChild(tr);
+  }
+
+  // Si hay meta, agregamos las filas finales como en el sistema (No registrados, Votos nulos, Total votos)
+  if (meta && (meta.no_registrados !== null || meta.votos_nulos !== null || meta.total_votos !== null)) {
+    const makeTotalRow = (label, value, pct) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td></td>
+        <td><b>${label}</b></td>
+        <td class="num"><b>${fmtInt(value)}</b></td>
+        <td class="num"><b>${pct !== null && pct !== undefined ? fmtPct(pct) : "—"}</b></td>
+      `;
+      tbody.appendChild(tr);
+    };
+
+    if (meta.no_registrados !== null) makeTotalRow("No registrados", meta.no_registrados, meta.pct_no_registrados);
+    if (meta.votos_nulos !== null) makeTotalRow("Votos nulos", meta.votos_nulos, meta.pct_nulos);
+    if (meta.total_votos !== null) makeTotalRow("Total votos", meta.total_votos, 100);
   }
 }
 
@@ -127,8 +193,6 @@ function renderChart(dataset, canvasId){
 
 /**
  * Vista con dos opciones (tabs): partido / candidatura
- * prefix: "df", "mun" (tecamac), etc.
- * datasetKey: clave de DATASETS
  */
 function makeViewTwoTabs(prefix, datasetKey){
   const tabPartido = document.getElementById(`${prefix}_tabPartido`);
@@ -142,7 +206,7 @@ function makeViewTwoTabs(prefix, datasetKey){
   async function loadAndRender(tipo){
     const url = DATASETS[datasetKey][tipo];
     const rows = await parseCSV(url);
-    const dataset = toDataset(rows);
+    const { dataset } = toDatasetWithMeta(rows);
 
     if (tipo === "partido"){
       renderTabla(dataset, `${prefix}_tbodyPartido`);
@@ -188,9 +252,7 @@ function makeViewTwoTabs(prefix, datasetKey){
 }
 
 /**
- * Vista única: "Por Acta"
- * prefix: "mgen"
- * datasetKey: DATASETS.federal_mun_general
+ * Vista única: "Por Acta" (con totales al final)
  */
 function makeViewSingleActa(prefix, datasetKey){
   let chartActa = null;
@@ -198,9 +260,9 @@ function makeViewSingleActa(prefix, datasetKey){
   async function loadAndRender(){
     const url = DATASETS[datasetKey].acta;
     const rows = await parseCSV(url);
-    const dataset = toDataset(rows);
+    const { dataset, meta } = toDatasetWithMeta(rows);
 
-    renderTabla(dataset, `${prefix}_tbodyActa`);
+    renderTabla(dataset, `${prefix}_tbodyActa`, meta);
     destroyChart(chartActa);
     chartActa = renderChart(dataset, `${prefix}_chartActa`);
   }
@@ -217,8 +279,7 @@ async function init(){
   const df = makeViewTwoTabs("df", "federal_df");
   await df.init();
 
-  // 2) Federal por Municipio (General) SOLO Acta
-  // Si todavía no subes FEDERAL_MUN_POR_ACTA.csv, puedes comentar estas dos líneas temporalmente.
+  // 2) Federal por Municipio (General) SOLO Acta (con totales)
   const mgen = makeViewSingleActa("mgen", "federal_mun_general");
   await mgen.init();
 
