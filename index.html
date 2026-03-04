@@ -7,6 +7,7 @@
 
   <link rel="stylesheet" href="css/styles.css" />
 
+  <!-- Librerías -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
@@ -23,24 +24,30 @@
   </header>
 
   <main class="container">
+
+    <!-- Introducción -->
     <section class="panel">
       <h1>Resultados Electorales</h1>
       <p class="muted">
-        Módulo inicial: <b>Diputaciones Federales</b>. Las secciones se organizan en paneles
-        <b>desplegables</b> para escalar después a <b>Diputaciones Locales</b>, <b>Ayuntamientos</b> y <b>Mapas</b>.
+        Este visor organiza la información por nivel de agregación. En nivel <b>distrital</b>
+        se muestran dos vistas (<b>Por Partido</b> y <b>Por Candidatura</b>). En nivel
+        <b>municipal general</b> se presenta únicamente <b>Por Acta</b>. Para un <b>municipio individual</b>
+        (Tecámac) se mantienen dos vistas.
       </p>
     </section>
 
-    <!-- =========================================
+    <!-- =========================================================
          DIPUTACIONES FEDERALES (DESPLEGABLE)
-    ========================================== -->
+    ========================================================== -->
     <details class="accordion" open>
       <summary>
         <span class="acc-title">Diputaciones Federales</span>
-        <span class="acc-sub">Resultados por Distrito Federal y por Municipio</span>
+        <span class="acc-sub">Distrito Federal · Municipio (Acta) · Municipio individual (Tecámac)</span>
       </summary>
 
-      <!-- ====== Federales por Distrito Federal ====== -->
+      <!-- =========================
+           FEDERAL · DISTRITO FEDERAL (2 vistas)
+      ========================== -->
       <div class="panel inner">
         <div class="section-title">
           <h2>Federal · Por Distrito Federal</h2>
@@ -97,18 +104,55 @@
         </div>
       </div>
 
-      <!-- ====== Federales por Municipio (Tecámac) ====== -->
+      <!-- =========================
+           FEDERAL · MUNICIPIO (GENERAL) (1 vista: POR ACTA)
+      ========================== -->
       <div class="panel inner">
         <div class="section-title">
-          <h2>Federal · Por Municipio</h2>
-          <div class="badge">Municipio</div>
+          <h2>Federal · Por Municipio (General)</h2>
+          <div class="badge">Acta</div>
+        </div>
+
+        <p class="muted">
+          En el nivel municipal general se presenta únicamente la vista <b>Por Acta</b>.
+        </p>
+
+        <div class="view" id="mgen_viewActa">
+          <div class="table-wrap">
+            <table class="results">
+              <thead>
+                <tr>
+                  <th>Logo</th>
+                  <th>Actor Político</th>
+                  <th class="num">Votos</th>
+                  <th class="num">% de la votación</th>
+                </tr>
+              </thead>
+              <tbody id="mgen_tbodyActa"></tbody>
+            </table>
+          </div>
+
+          <div class="chart-wrap">
+            <h3>Gráfica (Votos · Por Acta)</h3>
+            <canvas id="mgen_chartActa" height="110"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================
+           FEDERAL · MUNICIPIO INDIVIDUAL: TECÁMAC (2 vistas)
+      ========================== -->
+      <div class="panel inner">
+        <div class="section-title">
+          <h2>Federal · Municipio individual</h2>
+          <div class="badge">Tecámac</div>
         </div>
 
         <div class="filters">
           <div class="filter">
             <label for="mun_selMunicipio">Municipio</label>
-            <select id="mun_selMunicipio">
-              <option value="TECAMAC" selected>Tecámac</option>
+            <select id="mun_selMunicipio" disabled>
+              <option value="TECAMAC" selected>82. Tecámac</option>
             </select>
           </div>
         </div>
@@ -118,7 +162,7 @@
           <button class="tab" id="mun_tabCandidatura" type="button">Por Candidatura</button>
         </div>
 
-        <!-- Municipio · Partido -->
+        <!-- Tecámac · Partido -->
         <div class="view" id="mun_viewPartido">
           <div class="table-wrap">
             <table class="results">
@@ -140,7 +184,7 @@
           </div>
         </div>
 
-        <!-- Municipio · Candidatura -->
+        <!-- Tecámac · Candidatura -->
         <div class="view hidden" id="mun_viewCandidatura">
           <div class="table-wrap">
             <table class="results">
@@ -162,38 +206,40 @@
           </div>
         </div>
       </div>
+
     </details>
 
-    <!-- =========================================
-         DIPUTACIONES LOCALES (DESPLEGABLE - LISTO PARA CONECTAR DESPUÉS)
-    ========================================== -->
+    <!-- =========================================================
+         DIPUTACIONES LOCALES (DESPLEGABLE - PREPARADO)
+    ========================================================== -->
     <details class="accordion">
       <summary>
         <span class="acc-title">Diputaciones Locales</span>
-        <span class="acc-sub">Se habilitará con CSV locales (por distrito local y municipio)</span>
+        <span class="acc-sub">Se conectará con CSV locales (distrito local y municipio)</span>
       </summary>
 
       <div class="panel inner">
         <p class="muted">
-          Este apartado ya está contemplado. En cuanto subas los CSV de resultados locales,
-          replicamos la misma lógica: tabla con logos + gráfica, con paneles desplegables.
+          Este módulo se implementará replicando el mismo patrón:
+          <b>distrital</b> con 2 vistas, <b>municipio general</b> con 1 vista (acta),
+          y <b>municipio individual</b> con 2 vistas cuando aplique.
         </p>
       </div>
     </details>
 
-    <!-- =========================================
-         AYUNTAMIENTOS (DESPLEGABLE - LISTO PARA CONECTAR DESPUÉS)
-    ========================================== -->
+    <!-- =========================================================
+         AYUNTAMIENTOS (DESPLEGABLE - PREPARADO)
+    ========================================================== -->
     <details class="accordion">
       <summary>
         <span class="acc-title">Ayuntamientos</span>
-        <span class="acc-sub">Se habilitará con CSV por municipio</span>
+        <span class="acc-sub">Se conectará con CSV por municipio</span>
       </summary>
 
       <div class="panel inner">
         <p class="muted">
-          Este apartado también queda preparado. Posteriormente conectamos CSV de ayuntamientos
-          (por partido y por candidatura), y después lo enlazamos con la pantalla de mapas.
+          Queda contemplado para la siguiente fase. Posteriormente se añadirá la pantalla de mapas
+          y el módulo para registro de representantes.
         </p>
       </div>
     </details>
@@ -204,7 +250,9 @@
     <span class="muted">SCETECAMAC · Visor Electoral</span>
   </footer>
 
+  <!-- Scripts del proyecto -->
   <script src="js/config_partidos.js"></script>
   <script src="js/resultados.js"></script>
 </body>
 </html>
+
