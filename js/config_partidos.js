@@ -1,5 +1,6 @@
 // Catálogo base (colores fijos) + ruta de logo.
-// Regla: actor_politico (CSV) debe coincidir con el nombre del PNG.
+// Regla: actor_politico (CSV) debe coincidir con el nombre del PNG en assets/logos/.
+
 const PARTIDOS_BASE = {
   PAN:    { nombre: "PAN",    color: "#0056A3" },
   PRI:    { nombre: "PRI",    color: "#006847" },
@@ -8,31 +9,30 @@ const PARTIDOS_BASE = {
   PT:     { nombre: "PT",     color: "#D50000" },
   MC:     { nombre: "MC",     color: "#F58220" },
   MORENA: { nombre: "MORENA", color: "#7A1F1F" },
-  NAEM:   { nombre: "NAEM",   color: "#7E57C2" } // ajuste si quieres otro tono oficial
+  NAEM:   { nombre: "NAEM",   color: "#7E57C2" }
 };
-
-// Si la coalición tiene logo propio (y tú lo subiste), se usará por nombre exacto.
-// Si mañana aparece otra combinación, el sistema no se rompe (usa placeholder y color neutro).
-const LOGO_PLACEHOLDER = "assets/logos/GEN.png"; // opcional: si no existe, se ocultará la imagen
 
 function actorToLogo(actor){
   return `assets/logos/${actor}.png`;
 }
 
-// Color para coaliciones: neutro fijo (consistencia visual)
-// Si prefieres un color por coalición, lo agregamos como override.
+// Color neutro fijo para coaliciones (consistencia visual)
 const COALICION_COLOR = "#64748b";
 
 function getActorConfig(actor){
-  if (PARTIDOS_BASE[actor]) {
-    return { ...PARTIDOS_BASE[actor], logo: actorToLogo(actor) };
+  const key = String(actor || "").trim();
+
+  if (PARTIDOS_BASE[key]) {
+    return { ...PARTIDOS_BASE[key], logo: actorToLogo(key) };
   }
-  if (actor.includes("_")) {
+
+  if (key.includes("_")) {
     return {
-      nombre: actor.replaceAll("_", "-"),
+      nombre: key.replaceAll("_", "-"),
       color: COALICION_COLOR,
-      logo: actorToLogo(actor)
+      logo: actorToLogo(key)
     };
   }
-  return { nombre: actor, color: "#94a3b8", logo: LOGO_PLACEHOLDER };
+
+  return { nombre: key, color: "#94a3b8", logo: actorToLogo(key) };
 }
