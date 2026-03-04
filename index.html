@@ -18,39 +18,63 @@
       <div class="brand-mark"></div>
       <div>
         <div class="brand-title">SCETECAMAC</div>
-        <div class="brand-subtitle">Visor Electoral · Resultados</div>
+        <div class="brand-subtitle">Visor Electoral</div>
       </div>
     </div>
   </header>
 
   <main class="container">
 
-    <!-- Introducción -->
+    <!-- =========================
+         MENU PRINCIPAL (MÓDULOS)
+    ========================== -->
     <section class="panel">
-      <h1>Resultados Electorales</h1>
-      <p class="muted">
-        Este visor organiza la información por nivel de agregación. En nivel <b>distrital</b>
-        se muestran dos vistas (<b>Por Partido</b> y <b>Por Candidatura</b>). En nivel
-        <b>municipal general</b> se presenta únicamente <b>Por Acta</b>. Para un <b>municipio individual</b>
-        (Tecámac) se mantienen dos vistas.
+      <div class="section-title" style="margin-bottom: 10px;">
+        <h1>Panel de Resultados</h1>
+        <div class="badge">Tecámac</div>
+      </div>
+
+      <div class="filters">
+        <div class="filter">
+          <label for="selModulo">Módulo</label>
+          <select id="selModulo">
+            <option value="federal" selected>Diputaciones Federales</option>
+            <option value="local">Diputaciones Locales (próximamente)</option>
+            <option value="municipal">Ayuntamientos (próximamente)</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="muted" style="margin-top:10px;">
+        Selecciona un módulo para visualizar sus resultados. Cada módulo se muestra como una pantalla independiente.
       </p>
     </section>
 
     <!-- =========================================================
-         DIPUTACIONES FEDERALES (DESPLEGABLE)
+         PANTALLA: FEDERAL
     ========================================================== -->
-    <details class="accordion" open>
-      <summary>
-        <span class="acc-title">Diputaciones Federales</span>
-        <span class="acc-sub">Distrito Federal · Municipio (Acta) · Municipio individual (Tecámac)</span>
-      </summary>
+    <section class="panel" id="screen_federal">
+      <div class="section-title">
+        <h2>Diputaciones Federales</h2>
+        <div class="badge">Resultados</div>
+      </div>
 
-      <!-- =========================
-           FEDERAL · DISTRITO FEDERAL (2 vistas)
-      ========================== -->
-      <div class="panel inner">
+      <!-- Submenú federal -->
+      <div class="filters" style="margin-top: 12px;">
+        <div class="filter">
+          <label for="selFederalVista">Nivel</label>
+          <select id="selFederalVista">
+            <option value="df" selected>Por Distrito Federal (Partido / Candidatura)</option>
+            <option value="mgen">Por Municipio (General) · Por Acta</option>
+            <option value="tecamac">Municipio individual (82. Tecámac)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ===== FEDERAL: DISTRITO FEDERAL ===== -->
+      <div id="federal_view_df" style="margin-top: 14px;">
         <div class="section-title">
-          <h2>Federal · Por Distrito Federal</h2>
+          <h3 style="margin:0;">Federal · Por Distrito Federal</h3>
           <div class="badge">DF</div>
         </div>
 
@@ -104,16 +128,14 @@
         </div>
       </div>
 
-      <!-- =========================
-           FEDERAL · MUNICIPIO (GENERAL) (1 vista: POR ACTA)
-      ========================== -->
-      <div class="panel inner">
+      <!-- ===== FEDERAL: MUNICIPIO GENERAL (ACTA) ===== -->
+      <div id="federal_view_mgen" class="hidden" style="margin-top: 14px;">
         <div class="section-title">
-          <h2>Federal · Por Municipio (General)</h2>
+          <h3 style="margin:0;">Federal · Por Municipio (General)</h3>
           <div class="badge">Acta</div>
         </div>
 
-        <p class="muted">
+        <p class="muted" style="margin-top:10px;">
           En el nivel municipal general se presenta únicamente la vista <b>Por Acta</b>.
         </p>
 
@@ -139,16 +161,15 @@
         </div>
       </div>
 
-      <!-- =========================
-           FEDERAL · MUNICIPIO INDIVIDUAL: TECÁMAC (2 vistas)
-      ========================== -->
-      <div class="panel inner">
+      <!-- ===== FEDERAL: TECÁMAC (MUNICIPIO INDIVIDUAL) ===== -->
+      <div id="federal_view_tecamac" class="hidden" style="margin-top: 14px;">
         <div class="section-title">
-          <h2>Federal · Municipio individual</h2>
-          <div class="badge">Tecámac</div>
+          <h3 style="margin:0;">Federal · Municipio individual</h3>
+          <div class="badge">82. Tecámac</div>
         </div>
 
-        <div class="filters">
+        <!-- Si solo será Tecámac, dejamos el select bloqueado -->
+        <div class="filters" style="margin-top: 10px;">
           <div class="filter">
             <label for="mun_selMunicipio">Municipio</label>
             <select id="mun_selMunicipio" disabled>
@@ -207,42 +228,33 @@
         </div>
       </div>
 
-    </details>
+    </section>
 
     <!-- =========================================================
-         DIPUTACIONES LOCALES (DESPLEGABLE - PREPARADO)
+         PANTALLA: LOCAL (POR AHORA SOLO MENSAJE)
     ========================================================== -->
-    <details class="accordion">
-      <summary>
-        <span class="acc-title">Diputaciones Locales</span>
-        <span class="acc-sub">Se conectará con CSV locales (distrito local y municipio)</span>
-      </summary>
-
-      <div class="panel inner">
-        <p class="muted">
-          Este módulo se implementará replicando el mismo patrón:
-          <b>distrital</b> con 2 vistas, <b>municipio general</b> con 1 vista (acta),
-          y <b>municipio individual</b> con 2 vistas cuando aplique.
-        </p>
+    <section class="panel hidden" id="screen_local">
+      <div class="section-title">
+        <h2>Diputaciones Locales</h2>
+        <div class="badge">Próximamente</div>
       </div>
-    </details>
+      <p class="muted" style="margin-top:10px;">
+        Este módulo se habilitará cuando subas los CSV locales (distrito local y municipio).
+      </p>
+    </section>
 
     <!-- =========================================================
-         AYUNTAMIENTOS (DESPLEGABLE - PREPARADO)
+         PANTALLA: MUNICIPAL (AYUNTAMIENTOS) (POR AHORA SOLO MENSAJE)
     ========================================================== -->
-    <details class="accordion">
-      <summary>
-        <span class="acc-title">Ayuntamientos</span>
-        <span class="acc-sub">Se conectará con CSV por municipio</span>
-      </summary>
-
-      <div class="panel inner">
-        <p class="muted">
-          Queda contemplado para la siguiente fase. Posteriormente se añadirá la pantalla de mapas
-          y el módulo para registro de representantes.
-        </p>
+    <section class="panel hidden" id="screen_municipal">
+      <div class="section-title">
+        <h2>Ayuntamientos</h2>
+        <div class="badge">Próximamente</div>
       </div>
-    </details>
+      <p class="muted" style="margin-top:10px;">
+        Este módulo se habilitará cuando subas los CSV de ayuntamientos por municipio.
+      </p>
+    </section>
 
   </main>
 
@@ -250,9 +262,54 @@
     <span class="muted">SCETECAMAC · Visor Electoral</span>
   </footer>
 
-  <!-- Scripts del proyecto -->
+  <!-- Scripts -->
   <script src="js/config_partidos.js"></script>
   <script src="js/resultados.js"></script>
+
+  <!-- Control de pantallas (módulos) y vistas internas -->
+  <script>
+    const selModulo = document.getElementById("selModulo");
+    const screenFederal = document.getElementById("screen_federal");
+    const screenLocal = document.getElementById("screen_local");
+    const screenMunicipal = document.getElementById("screen_municipal");
+
+    const selFederalVista = document.getElementById("selFederalVista");
+    const viewDF = document.getElementById("federal_view_df");
+    const viewMGen = document.getElementById("federal_view_mgen");
+    const viewTec = document.getElementById("federal_view_tecamac");
+
+    function showScreen(screen){
+      screenFederal.classList.add("hidden");
+      screenLocal.classList.add("hidden");
+      screenMunicipal.classList.add("hidden");
+
+      if (screen === "federal") screenFederal.classList.remove("hidden");
+      if (screen === "local") screenLocal.classList.remove("hidden");
+      if (screen === "municipal") screenMunicipal.classList.remove("hidden");
+    }
+
+    function showFederalView(which){
+      viewDF.classList.add("hidden");
+      viewMGen.classList.add("hidden");
+      viewTec.classList.add("hidden");
+
+      if (which === "df") viewDF.classList.remove("hidden");
+      if (which === "mgen") viewMGen.classList.remove("hidden");
+      if (which === "tecamac") viewTec.classList.remove("hidden");
+    }
+
+    selModulo.addEventListener("change", (e) => {
+      showScreen(e.target.value);
+    });
+
+    selFederalVista.addEventListener("change", (e) => {
+      showFederalView(e.target.value);
+    });
+
+    // Inicial
+    showScreen("federal");
+    showFederalView("df");
+  </script>
 </body>
 </html>
 
