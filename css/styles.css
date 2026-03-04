@@ -1,0 +1,182 @@
+:root{
+  --bg: #0b1220;
+  --panel: #0f1b2d;
+  --panel2:#0c1626;
+  --text: #e7eefc;
+  --muted:#a8b6d6;
+  --line:#20314f;
+
+  --green:#0f8a5f;
+  --green2:#12b981;
+  --green3:#0a6b49;
+}
+
+*{ box-sizing:border-box; }
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: radial-gradient(1200px 700px at 15% 10%, rgba(18,185,129,.18), transparent 55%),
+              radial-gradient(900px 600px at 90% 20%, rgba(15,138,95,.14), transparent 55%),
+              var(--bg);
+  color: var(--text);
+}
+
+.topbar{
+  position: sticky;
+  top:0;
+  z-index: 20;
+  background: rgba(11,18,32,.78);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(32,49,79,.6);
+  padding: 14px 18px;
+}
+.brand{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.brand-dot{
+  width:12px;height:12px;border-radius:50%;
+  background: linear-gradient(135deg, var(--green2), var(--green));
+  box-shadow: 0 0 0 6px rgba(18,185,129,.12);
+}
+.brand-title{ font-weight: 750; letter-spacing:.4px; }
+.brand-subtitle{ color: var(--muted); font-size:.92rem; margin-top:2px; }
+
+.container{
+  width:min(1200px, 92vw);
+  margin: 22px auto 28px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.panel{
+  background: linear-gradient(180deg, rgba(15,27,45,.92), rgba(12,22,38,.92));
+  border: 1px solid rgba(32,49,79,.65);
+  border-radius: 14px;
+  padding: 18px 18px 16px;
+  box-shadow: 0 12px 35px rgba(0,0,0,.28);
+}
+
+h1{ margin:0 0 6px; font-size: 1.35rem; }
+h2{ margin:0; font-size: 1.12rem; }
+h3{ margin: 14px 0 10px; font-size: 1rem; color: #d7e5ff; }
+
+.muted{ color: var(--muted); }
+
+.filters{
+  display:grid;
+  grid-template-columns: 1.1fr 1.6fr 1.6fr .9fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+.filter label{
+  display:block;
+  font-size:.88rem;
+  color: var(--muted);
+  margin-bottom:6px;
+}
+select{
+  width:100%;
+  background: rgba(8,14,25,.6);
+  border: 1px solid rgba(32,49,79,.8);
+  color: var(--text);
+  padding: 10px 10px;
+  border-radius: 10px;
+  outline:none;
+}
+select:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+button{
+  width:100%;
+  margin-top: 22px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(18,185,129,.55);
+  background: linear-gradient(135deg, var(--green2), var(--green));
+  color: #07131f;
+  font-weight: 750;
+  cursor:pointer;
+}
+button:hover{ filter: brightness(1.03); }
+
+.section-title{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom: 8px;
+}
+.badge{
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(18,185,129,.5);
+  background: rgba(18,185,129,.12);
+  color: #bff7df;
+  font-size: .86rem;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 12px 0 14px;
+}
+.card{
+  background: rgba(8,14,25,.55);
+  border: 1px solid rgba(32,49,79,.7);
+  border-radius: 12px;
+  padding: 12px 12px;
+}
+.card .k{ color: var(--muted); font-size:.86rem; }
+.card .v{ font-size:1.15rem; font-weight:800; margin-top:4px; }
+
+.table-wrap{ overflow:auto; border-radius: 12px; border: 1px solid rgba(32,49,79,.7); }
+table{ width:100%; border-collapse: collapse; background: rgba(8,14,25,.45); }
+thead th{
+  text-align:left;
+  font-size:.9rem;
+  color:#cfe0ff;
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(32,49,79,.8);
+}
+tbody td{
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(32,49,79,.55);
+  vertical-align: middle;
+}
+tbody tr:hover{ background: rgba(18,185,129,.06); }
+.num{ text-align:right; white-space:nowrap; }
+
+.logo{
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(32,49,79,.6);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.chart-wrap{
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(32,49,79,.6);
+}
+
+.footer{
+  width:min(1200px, 92vw);
+  margin: 0 auto 26px;
+  padding: 10px 4px;
+  color: var(--muted);
+}
+
+@media (max-width: 980px){
+  .filters{ grid-template-columns: 1fr; }
+  button{ margin-top: 6px; }
+  .cards{ grid-template-columns: 1fr 1fr; }
+}
