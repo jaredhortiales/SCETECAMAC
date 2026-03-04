@@ -1,12 +1,18 @@
 // Requiere: Chart.js + PapaParse + getActorConfig(actor) desde config_partidos.js
 
 const DATASETS = {
-  // Diputados Federales por Distrito Federal
+  // Distrital: 2 opciones
   federal_df: {
     partido: "data/FEDERAL_DF_POR_PARTIDO.csv",
     candidatura: "data/FEDERAL_DF_POR_CANDIDATURA.csv"
   },
-  // Diputados Federales por Municipio (Tecámac)
+
+  // Municipal general: SOLO "Por Acta"
+  federal_mun_general: {
+    acta: "data/FEDERAL_MUN_POR_ACTA.csv"
+  },
+
+  // Municipio individual (Tecámac): 2 opciones
   federal_mun_tecamac: {
     partido: "data/FEDERAL_MUN_TECAMAC_POR_PARTIDO.csv",
     candidatura: "data/FEDERAL_MUN_TECAMAC_POR_CANDIDATURA.csv"
@@ -119,8 +125,12 @@ function renderChart(dataset, canvasId){
   });
 }
 
-// Control genérico de una vista (tabs + tabla + gráfica)
-function makeView(prefix, datasetKey){
+/**
+ * Vista con dos opciones (tabs): partido / candidatura
+ * prefix: "df", "mun" (tecamac), etc.
+ * datasetKey: clave de DATASETS
+ */
+function makeViewTwoTabs(prefix, datasetKey){
   const tabPartido = document.getElementById(`${prefix}_tabPartido`);
   const tabCandidatura = document.getElementById(`${prefix}_tabCandidatura`);
   const viewPartido = document.getElementById(`${prefix}_viewPartido`);
@@ -169,7 +179,6 @@ function makeView(prefix, datasetKey){
     await loadAndRender("candidatura");
   });
 
-  // Inicial
   return {
     init: async () => {
       setActive("partido");
@@ -178,14 +187,44 @@ function makeView(prefix, datasetKey){
   };
 }
 
+/**
+ * Vista única: "Por Acta"
+ * prefix: "mgen"
+ * datasetKey: DATASETS.federal_mun_general
+ */
+function makeViewSingleActa(prefix, datasetKey){
+  let chartActa = null;
+
+  async function loadAndRender(){
+    const url = DATASETS[datasetKey].acta;
+    const rows = await parseCSV(url);
+    const dataset = toDataset(rows);
+
+    renderTabla(dataset, `${prefix}_tbodyActa`);
+    destroyChart(chartActa);
+    chartActa = renderChart(dataset, `${prefix}_chartActa`);
+  }
+
+  return {
+    init: async () => {
+      await loadAndRender();
+    }
+  };
+}
+
 async function init(){
-  // Federal DF
-  const df = makeView("df", "federal_df");
+  // 1) Federal por Distrito Federal (2 tabs)
+  const df = makeViewTwoTabs("df", "federal_df");
   await df.init();
 
-  // Federal Municipio Tecámac
-  const mun = makeView("mun", "federal_mun_tecamac");
-  await mun.init();
+  // 2) Federal por Municipio (General) SOLO Acta
+  // Si todavía no subes FEDERAL_MUN_POR_ACTA.csv, puedes comentar estas dos líneas temporalmente.
+  const mgen = makeViewSingleActa("mgen", "federal_mun_general");
+  await mgen.init();
+
+  // 3) Federal por Municipio individual (Tecámac) (2 tabs)
+  const munTec = makeViewTwoTabs("mun", "federal_mun_tecamac");
+  await munTec.init();
 }
 
 init().catch(err => {
