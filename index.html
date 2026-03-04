@@ -7,7 +7,7 @@
 
   <link rel="stylesheet" href="css/styles.css" />
 
-  <!-- Librerías (primero) -->
+  <!-- Librerías -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
@@ -37,14 +37,14 @@
           <label for="selModulo">Módulo</label>
           <select id="selModulo">
             <option value="federal" selected>Diputaciones Federales</option>
-            <option value="local">Diputaciones Locales (próximamente)</option>
-            <option value="municipio">Municipio / Ayuntamiento (próximamente)</option>
+            <option value="local">Diputaciones Locales</option>
+            <option value="municipio">Municipio / Ayuntamiento</option>
           </select>
         </div>
       </div>
 
       <p class="muted" style="margin-top:10px;">
-        Selecciona un módulo para visualizar sus resultados. Cada módulo se muestra como una pantalla independiente.
+        Selecciona un módulo para visualizar resultados. Cada módulo se muestra como una pantalla independiente.
       </p>
     </section>
 
@@ -67,7 +67,7 @@
         </div>
       </div>
 
-      <!-- ===== VISTA DF ===== -->
+      <!-- VISTA DF -->
       <div id="federal_view_df" style="margin-top:14px;">
         <div class="section-title">
           <h3 style="margin:0;">Federal · Por Distrito Federal</h3>
@@ -122,16 +122,12 @@
         </div>
       </div>
 
-      <!-- ===== VISTA MUNICIPIO GENERAL (ACTA) ===== -->
+      <!-- VISTA MUNICIPIO GENERAL (ACTA) -->
       <div id="federal_view_mgen" class="hidden" style="margin-top:14px;">
         <div class="section-title">
           <h3 style="margin:0;">Federal · Por Municipio (General)</h3>
           <div class="badge">Acta</div>
         </div>
-
-        <p class="muted" style="margin-top:10px;">
-          En el nivel municipal general se presenta únicamente la vista <b>Por Acta</b>.
-        </p>
 
         <div class="view" id="mgen_viewActa">
           <div class="table-wrap">
@@ -156,22 +152,170 @@
       </div>
     </section>
 
-    <!-- PANTALLA: LOCAL -->
+    <!-- =========================
+         PANTALLA: LOCAL
+    ========================== -->
     <section class="panel hidden" id="screen_local">
       <div class="section-title">
         <h2>Diputaciones Locales</h2>
-        <div class="badge">Próximamente</div>
+        <div class="badge">Resultados</div>
       </div>
-      <p class="muted" style="margin-top:10px;">Se habilitará al subir los CSV locales.</p>
+
+      <div class="filters" style="margin-top:12px;">
+        <div class="filter">
+          <label for="selLocalVista">Nivel</label>
+          <select id="selLocalVista">
+            <option value="dl" selected>Por Distrito Local (Partido / Candidatura)</option>
+            <option value="lmgen">Por Municipio (General) · Por Acta</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- VISTA DL -->
+      <div id="local_view_dl" style="margin-top:14px;">
+        <div class="section-title">
+          <h3 style="margin:0;">Local · Por Distrito Local</h3>
+          <div class="badge">DL</div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" id="ldl_tabPartido" type="button">Por Partido</button>
+          <button class="tab" id="ldl_tabCandidatura" type="button">Por Candidatura</button>
+        </div>
+
+        <div class="view" id="ldl_viewPartido">
+          <div class="table-wrap">
+            <table class="results">
+              <thead>
+                <tr>
+                  <th>Logo</th>
+                  <th>Actor Político</th>
+                  <th class="num">Votos</th>
+                  <th class="num">% de la votación</th>
+                </tr>
+              </thead>
+              <tbody id="ldl_tbodyPartido"></tbody>
+            </table>
+          </div>
+
+          <div class="chart-wrap">
+            <h3>Gráfica (Votos por Partido)</h3>
+            <canvas id="ldl_chartPartido" height="110"></canvas>
+          </div>
+        </div>
+
+        <div class="view hidden" id="ldl_viewCandidatura">
+          <div class="table-wrap">
+            <table class="results">
+              <thead>
+                <tr>
+                  <th>Logo</th>
+                  <th>Actor Político</th>
+                  <th class="num">Votos</th>
+                  <th class="num">% de la votación</th>
+                </tr>
+              </thead>
+              <tbody id="ldl_tbodyCandidatura"></tbody>
+            </table>
+          </div>
+
+          <div class="chart-wrap">
+            <h3>Gráfica (Votos por Candidatura)</h3>
+            <canvas id="ldl_chartCandidatura" height="110"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA MUNICIPIO GENERAL (ACTA) -->
+      <div id="local_view_lmgen" class="hidden" style="margin-top:14px;">
+        <div class="section-title">
+          <h3 style="margin:0;">Local · Por Municipio (General)</h3>
+          <div class="badge">Acta</div>
+        </div>
+
+        <div class="view">
+          <div class="table-wrap">
+            <table class="results">
+              <thead>
+                <tr>
+                  <th>Logo</th>
+                  <th>Actor Político</th>
+                  <th class="num">Votos</th>
+                  <th class="num">% de la votación</th>
+                </tr>
+              </thead>
+              <tbody id="lmgen_tbodyActa"></tbody>
+            </table>
+          </div>
+
+          <div class="chart-wrap">
+            <h3>Gráfica (Votos · Por Acta)</h3>
+            <canvas id="lmgen_chartActa" height="110"></canvas>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- PANTALLA: MUNICIPIO -->
+    <!-- =========================
+         PANTALLA: MUNICIPIO / AYUNTAMIENTO
+    ========================== -->
     <section class="panel hidden" id="screen_municipio">
       <div class="section-title">
         <h2>Municipio / Ayuntamiento</h2>
-        <div class="badge">Próximamente</div>
+        <div class="badge">Resultados</div>
       </div>
-      <p class="muted" style="margin-top:10px;">Se habilitará al subir los CSV municipales.</p>
+
+      <div class="section-title" style="margin-top:12px;">
+        <h3 style="margin:0;">Ayuntamiento · Tecámac</h3>
+        <div class="badge">Municipio</div>
+      </div>
+
+      <div class="tabs" style="margin-top:10px;">
+        <button class="tab active" id="mun_tabPartido" type="button">Por Partido</button>
+        <button class="tab" id="mun_tabCandidatura" type="button">Por Candidatura</button>
+      </div>
+
+      <div class="view" id="mun_viewPartido">
+        <div class="table-wrap">
+          <table class="results">
+            <thead>
+              <tr>
+                <th>Logo</th>
+                <th>Actor Político</th>
+                <th class="num">Votos</th>
+                <th class="num">% de la votación</th>
+              </tr>
+            </thead>
+            <tbody id="mun_tbodyPartido"></tbody>
+          </table>
+        </div>
+
+        <div class="chart-wrap">
+          <h3>Gráfica (Votos por Partido)</h3>
+          <canvas id="mun_chartPartido" height="110"></canvas>
+        </div>
+      </div>
+
+      <div class="view hidden" id="mun_viewCandidatura">
+        <div class="table-wrap">
+          <table class="results">
+            <thead>
+              <tr>
+                <th>Logo</th>
+                <th>Actor Político</th>
+                <th class="num">Votos</th>
+                <th class="num">% de la votación</th>
+              </tr>
+            </thead>
+            <tbody id="mun_tbodyCandidatura"></tbody>
+          </table>
+        </div>
+
+        <div class="chart-wrap">
+          <h3>Gráfica (Votos por Candidatura)</h3>
+          <canvas id="mun_chartCandidatura" height="110"></canvas>
+        </div>
+      </div>
     </section>
 
   </main>
@@ -192,8 +336,12 @@
     const screenMunicipio = document.getElementById("screen_municipio");
 
     const selFederalVista = document.getElementById("selFederalVista");
-    const viewDF = document.getElementById("federal_view_df");
-    const viewMGen = document.getElementById("federal_view_mgen");
+    const federalDF = document.getElementById("federal_view_df");
+    const federalMGen = document.getElementById("federal_view_mgen");
+
+    const selLocalVista = document.getElementById("selLocalVista");
+    const localDL = document.getElementById("local_view_dl");
+    const localLMGen = document.getElementById("local_view_lmgen");
 
     function showScreen(screen){
       screenFederal.classList.add("hidden");
@@ -206,17 +354,26 @@
     }
 
     function showFederalView(which){
-      viewDF.classList.add("hidden");
-      viewMGen.classList.add("hidden");
-      if (which === "df") viewDF.classList.remove("hidden");
-      if (which === "mgen") viewMGen.classList.remove("hidden");
+      federalDF.classList.add("hidden");
+      federalMGen.classList.add("hidden");
+      if (which === "df") federalDF.classList.remove("hidden");
+      if (which === "mgen") federalMGen.classList.remove("hidden");
+    }
+
+    function showLocalView(which){
+      localDL.classList.add("hidden");
+      localLMGen.classList.add("hidden");
+      if (which === "dl") localDL.classList.remove("hidden");
+      if (which === "lmgen") localLMGen.classList.remove("hidden");
     }
 
     selModulo.addEventListener("change", (e) => showScreen(e.target.value));
     selFederalVista.addEventListener("change", (e) => showFederalView(e.target.value));
+    selLocalVista.addEventListener("change", (e) => showLocalView(e.target.value));
 
     showScreen("federal");
     showFederalView("df");
+    showLocalView("dl");
   </script>
 </body>
 </html>
