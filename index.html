@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SCETECAMAC | Resultados Electorales</title>
+
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- PapaParse (CSV) -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <div>
+        <div class="brand-title">SCETECAMAC</div>
+        <div class="brand-subtitle">Visor Electoral · Diputaciones Federales</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <h1>Resultados Electorales</h1>
+      <p class="muted">
+        Consulta por <b>Municipio</b> y posteriormente por <b>Distrito Federal</b>.
+        La tabla replica el formato de resultados y agrega <b>logotipo</b> por actor político.
+      </p>
+
+      <div class="filters">
+        <div class="filter">
+          <label for="selNivel">Nivel</label>
+          <select id="selNivel">
+            <option value="municipio" selected>Municipio</option>
+            <option value="distrito">Distrito Federal</option>
+          </select>
+        </div>
+
+        <div class="filter">
+          <label for="selMunicipio">Municipio</label>
+          <select id="selMunicipio"></select>
+        </div>
+
+        <div class="filter">
+          <label for="selDistrito">Distrito Federal</label>
+          <select id="selDistrito" disabled></select>
+        </div>
+
+        <div class="filter filter-btn">
+          <button id="btnConsultar">Consultar</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">
+        <h2 id="tituloTabla">Tabla de Resultados</h2>
+        <div class="badge" id="badgeFuente">Diputaciones Federales</div>
+      </div>
+
+      <div class="cards" id="cardsResumen"></div>
+
+      <div class="table-wrap">
+        <table class="results">
+          <thead>
+            <tr>
+              <th>Logo</th>
+              <th>Actor Político</th>
+              <th class="num">Votos</th>
+              <th class="num">% de la votación</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyResultados"></tbody>
+        </table>
+      </div>
+
+      <div class="chart-wrap">
+        <h3>Gráfica (Votos por Actor Político)</h3>
+        <canvas id="chartVotos" height="110"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span class="muted">SCETECAMAC · Módulo de Resultados Electorales</span>
+  </footer>
+
+  <script src="js/config_partidos.js"></script>
+  <script src="js/app_resultados.js"></script>
+</body>
+</html>
