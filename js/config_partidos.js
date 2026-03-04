@@ -1,38 +1,24 @@
-// Catálogo base (colores fijos) + ruta de logo.
-// Regla: actor_politico (CSV) debe coincidir con el nombre del PNG en assets/logos/.
+const LOGO_BASE = "assets/logos/";
 
-const PARTIDOS_BASE = {
-  PAN:    { nombre: "PAN",    color: "#0056A3" },
-  PRI:    { nombre: "PRI",    color: "#006847" },
-  PRD:    { nombre: "PRD",    color: "#FFD400" },
-  PVEM:   { nombre: "PVEM",   color: "#3AAA35" },
-  PT:     { nombre: "PT",     color: "#D50000" },
-  MC:     { nombre: "MC",     color: "#F58220" },
-  MORENA: { nombre: "MORENA", color: "#7A1F1F" },
-  NAEM:   { nombre: "NAEM",   color: "#7E57C2" }
+const PARTY_COLORS = {
+  PAN: "#0057B7",
+  PRI: "#006341",
+  PRD: "#FFD100",
+  PVEM: "#00A651",
+  PT: "#D81E05",
+  MC: "#F36F21",
+  MORENA: "#7A0019",
+  NAEM: "#1F7A3A" // define un verde institucional para NAEM
 };
 
-function actorToLogo(actor){
-  return `assets/logos/${actor}.png`;
-}
-
-// Color neutro fijo para coaliciones (consistencia visual)
-const COALICION_COLOR = "#64748b";
-
 function getActorConfig(actor){
-  const key = String(actor || "").trim();
+  const key = String(actor || "").trim().toUpperCase();
 
-  if (PARTIDOS_BASE[key]) {
-    return { ...PARTIDOS_BASE[key], logo: actorToLogo(key) };
-  }
+  // Si existe color específico, lo usamos; si no, un verde neutro
+  const color = PARTY_COLORS[key] || "#16a34a";
 
-  if (key.includes("_")) {
-    return {
-      nombre: key.replaceAll("_", "-"),
-      color: COALICION_COLOR,
-      logo: actorToLogo(key)
-    };
-  }
+  // Logo: si el archivo existe con el mismo nombre, se carga; si falla, se oculta por onerror
+  const logo = `${LOGO_BASE}${key}.png`;
 
-  return { nombre: key, color: "#94a3b8", logo: actorToLogo(key) };
+  return { color, logo };
 }
