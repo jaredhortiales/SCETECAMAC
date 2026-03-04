@@ -1,253 +1,440 @@
-// Requiere: Chart.js + PapaParse + getActorConfig(actor) en config_partidos.js
+/* resultados.js
+   SCETECAMAC · Visor Electoral
+   Carga CSV desde /data y pinta tabla + gráfica con Chart.js
+*/
 
-const DATASETS = {
-  // FEDERAL
-  federal_df: {
-    partido: "data/FEDERAL_DF_POR_PARTIDO.csv",
-    candidatura: "data/FEDERAL_DF_POR_CANDIDATURA.csv"
+/* =========================
+   CONFIG
+========================= */
+const DATA = {
+  federal: {
+    df_partido: "data/FEDERAL_DF_POR_PARTIDO.csv",
+    df_candidatura: "data/FEDERAL_DF_POR_CANDIDATURA.csv",
+    mun_acta: "data/FEDERAL_MUN_POR_ACTA.csv",
   },
-  federal_mun_general: {
-    acta: "data/FEDERAL_MUN_POR_ACTA.csv"
+  local: {
+    dl_partido: "data/LOCAL_DL_POR_PARTIDO.csv",
+    dl_candidatura: "data/LOCAL_DL_POR_CANDIDATURA.csv",
+    mun_acta: "data/LOCAL_MUN_POR_ACTA.csv",
   },
-
-  // LOCAL (cuando subas los CSV)
-  local_dl: {
-    partido: "data/LOCAL_DL_POR_PARTIDO.csv",
-    candidatura: "data/LOCAL_DL_POR_CANDIDATURA.csv"
-  },
-  local_mun_general: {
-    acta: "data/LOCAL_MUN_POR_ACTA.csv"
-  },
-
-  // MUNICIPIO (Ayuntamiento)
   municipio: {
     partido: "data/MUNICIPIO_POR_PARTIDO.csv",
-    candidatura: "data/MUNICIPIO_POR_CANDIDATURA.csv"
-  }
+    candidatura: "data/MUNICIPIO_POR_CANDIDATURA.csv",
+  },
 };
 
-function fmtInt(n){
+const LOGO_BASE = "assets/logos/";
+
+/* =========================
+   HELPERS
+========================= */
+function $(id) {
+  return document.getElementById(id);
+}
+
+function safeText(v) {
+  return (v ?? "").toString().trim();
+}
+
+function normalizeActorKey(actor) {
+  // Normaliza para nombres de archivo: MAYÚSCULAS, sin acentos, espacios->_
+  const s = safeText(actor)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/[^A-Za-z0-9_]/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .toUpperCase();
+
+  // Casos comunes de origen
+  if (s === "MORENA") return "MORENA";
+  if (s === "NAEM" || s === "N_A_E_M") return "NAEM";
+  if (s === "MOVIMIENTO_CIUDADANO") return "MC";
+
+  return s;
+}
+
+function isSpecialRow(actorKey) {
+  // filas tipo "No Registrados", "Votos Nulos", "Total Votos"
+  return /TOTAL|NULOS|NO_REG|NO_REGISTR|REGISTRADOS/i.test(actorKey);
+}
+
+function formatInt(n) {
   const x = Number(n);
-  return isFinite(x) ? x.toLocaleString("es-MX") : "—";
-}
-function fmtPct(n){
-  const x = Number(n);
-  return isFinite(x) ? `${x.toFixed(2)}%` : "—";
+  if (!Number.isFinite(x)) return safeText(n);
+  return x.toLocaleString("es-MX");
 }
 
-function parseCSV(url){
-  return new Promise((resolve, reject) => {
-    Papa.parse(url, {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      complete: (res) => resolve(res.data),
-      error: (err) => reject(err)
-    });
-  });
+function formatPct(p) {
+  const x = Number(p);
+  if (!Number.isFinite(x)) return safeText(p);
+  // ya viene como porcentaje (0-100) en tu CSV
+  return `${x.toFixed(2)}%`;
 }
 
-function getVal(row, keys){
-  for (const k of keys){
-    if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== "") return row[k];
-  }
-  return "";
-}
+/* =========================
+   COLOR CONFIG
+========================= */
+function getActorColor(actorKey) {
+  // Si tu config_partidos.js define getActorConfig(key) => {color: "#..."}
+  try {
+    if (typeof window.getActorConfig === "function") {
+      const cfg = window.getActorConfig(actorKey);
+      if (cfg && cfg.color) return cfg.color;
+    }
+  } catch (_) {}
 
-function toDatasetWithMeta(rows){
-  const out = [];
-  const meta = {
-    total_votos: null,
-    votos_nulos: null,
-    pct_nulos: null,
-    no_registrados: null,
-    pct_no_registrados: null
+  // Fallback (colores consistentes)
+  const fallback = {
+    MORENA: "#8C1D40",
+    PRI: "#0B7A3B",
+    PAN: "#1E4FA1",
+    PRD: "#F2C100",
+    PVEM: "#2E8B57",
+    PT: "#C62828",
+    MC: "#F57C00",
+    NAEM: "#6A1B9A",
+
+    PAN_PRI_PRD: "#37474F",
+    PAN_PRI: "#455A64",
+    PAN_PRD: "#546E7A",
+    PRI_PRD: "#607D8B",
+
+    PVEM_PT_MORENA: "#1B5E20",
+    PVEM_PT: "#2E7D32",
+    PVEM_MORENA: "#33691E",
+    PT_MORENA: "#4E342E",
+
+    PAN_PRI_PRD_NAEM: "#263238",
+    PAN_PRI_NAEM: "#3E2723",
+    PAN_PRD_NAEM: "#1A237E",
+    PRI_PRD_NAEM: "#004D40",
+    PAN_NAEM: "#311B92",
+    PRD_NAEM: "#827717",
   };
 
-  for (const r of rows){
-    if (meta.total_votos === null) {
-      const tv = getVal(r, ["total_votos","total"]);
-      if (tv !== "") meta.total_votos = Number(tv);
-    }
-    if (meta.votos_nulos === null) {
-      const vn = getVal(r, ["num_votos_n","votos_nulos"]);
-      if (vn !== "") meta.votos_nulos = Number(vn);
-    }
-    if (meta.pct_nulos === null) {
-      const pn = getVal(r, ["porcentaje_votos_nulos","porcentaje_vn","porcentaje_v_n","porcentaje_v"]);
-      if (pn !== "") meta.pct_nulos = Number(pn);
-    }
-    if (meta.no_registrados === null) {
-      const nr = getVal(r, ["num_votos_c","no_registrados"]);
-      if (nr !== "") meta.no_registrados = Number(nr);
-    }
-    if (meta.pct_no_registrados === null) {
-      const pnr = getVal(r, ["porcentaje_ca","porcentaje_no_registrados","porcentaje_nr"]);
-      if (pnr !== "") meta.pct_no_registrados = Number(pnr);
-    }
-
-    const actor = String(getVal(r, ["actor_politico","Actor Politico","Actor Político"])).trim();
-    if (!actor) continue;
-
-    const votos = Number(getVal(r, ["voto_actor_politico","voto_actor_p","votos","Votos"])) || 0;
-    const pct = Number(getVal(r, ["porcentaje_votacion","porcentaje_vc","porcentaje_v","porcentaje"])) || 0;
-
-    out.push({ actor, votos, pct });
-  }
-
-  out.sort((a,b) => b.votos - a.votos);
-  return { dataset: out, meta };
+  return fallback[actorKey] || "#2E7D32"; // verde por defecto
 }
 
-function renderTabla(dataset, tbodyId, meta=null){
-  const tbody = document.getElementById(tbodyId);
+/* =========================
+   CSV LOADER
+========================= */
+async function loadCSV(url) {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`No se pudo cargar CSV: ${url} (${res.status})`);
+  const text = await res.text();
+
+  const parsed = Papa.parse(text, {
+    header: true,
+    skipEmptyLines: true,
+    dynamicTyping: true,
+  });
+
+  if (parsed.errors?.length) {
+    console.warn("PapaParse warnings:", parsed.errors);
+  }
+  return parsed.data || [];
+}
+
+/* =========================
+   ROW MAPPING (robusto a columnas)
+========================= */
+function mapRows(rawRows) {
+  // Detecta columnas típicas del CSV que mostraste:
+  // actor_politico, voto_actor_p, porcentaje_voto_actor_p
+  // o variantes: votos, porcentaje_voto, porcentaje, etc.
+  const rows = rawRows
+    .map((r) => {
+      const actor =
+        r.actor_politico ??
+        r.actor_politico_nombre ??
+        r.actor ??
+        r.partido ??
+        r.candidatura ??
+        r["Actor Politico"] ??
+        r["Actor Político"];
+
+      const votos =
+        r.voto_actor_p ??
+        r.votos ??
+        r["Votos"] ??
+        r["votos"] ??
+        r.total ??
+        r["Total"];
+
+      const pct =
+        r.porcentaje_voto_actor_p ??
+        r.porcentaje_voto ??
+        r.porcentaje ??
+        r["Porcentaje"] ??
+        r["% de la votación"] ??
+        r["porcentaje_v"];
+
+      return {
+        actor: safeText(actor),
+        actorKey: normalizeActorKey(actor),
+        votos: Number(votos),
+        pct: Number(pct),
+      };
+    })
+    .filter((x) => x.actorKey.length > 0);
+
+  // Orden: primero normales por votos desc, luego especiales al final
+  const normal = rows.filter((x) => !isSpecialRow(x.actorKey)).sort((a, b) => (b.votos || 0) - (a.votos || 0));
+  const special = rows.filter((x) => isSpecialRow(x.actorKey));
+  return [...normal, ...special];
+}
+
+/* =========================
+   TABLE RENDER
+========================= */
+function renderTable(tbodyId, rows) {
+  const tbody = $(tbodyId);
   if (!tbody) return;
 
   tbody.innerHTML = "";
 
-  if (!dataset.length){
+  for (const r of rows) {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td colspan="4" class="muted">Sin datos.</td>`;
+
+    // Logo
+    const tdLogo = document.createElement("td");
+    tdLogo.style.width = "56px";
+
+    if (!isSpecialRow(r.actorKey)) {
+      const img = document.createElement("img");
+      img.src = `${LOGO_BASE}${r.actorKey}.png`;
+      img.alt = r.actor;
+      img.style.width = "26px";
+      img.style.height = "26px";
+      img.style.objectFit = "contain";
+      img.onerror = () => {
+        // Si falta logo, no rompe la tabla
+        img.style.display = "none";
+      };
+      tdLogo.appendChild(img);
+    }
+
+    // Actor
+    const tdActor = document.createElement("td");
+    tdActor.textContent = r.actor;
+
+    // Votos
+    const tdVotos = document.createElement("td");
+    tdVotos.className = "num";
+    tdVotos.textContent = formatInt(r.votos);
+
+    // %
+    const tdPct = document.createElement("td");
+    tdPct.className = "num";
+    tdPct.textContent = formatPct(r.pct);
+
+    tr.appendChild(tdLogo);
+    tr.appendChild(tdActor);
+    tr.appendChild(tdVotos);
+    tr.appendChild(tdPct);
+
     tbody.appendChild(tr);
-    return;
-  }
-
-  for (const row of dataset){
-    const cfg = getActorConfig(row.actor);
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><img class="logo" src="${cfg.logo}" alt="${row.actor}" onerror="this.style.display='none';" /></td>
-      <td>${row.actor}</td>
-      <td class="num">${fmtInt(row.votos)}</td>
-      <td class="num">${fmtPct(row.pct)}</td>
-    `;
-    tbody.appendChild(tr);
-  }
-
-  if (meta && (meta.no_registrados !== null || meta.votos_nulos !== null || meta.total_votos !== null)) {
-    const makeTotalRow = (label, value, pct) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td></td>
-        <td><b>${label}</b></td>
-        <td class="num"><b>${fmtInt(value)}</b></td>
-        <td class="num"><b>${pct !== null && pct !== undefined ? fmtPct(pct) : "—"}</b></td>
-      `;
-      tbody.appendChild(tr);
-    };
-
-    if (meta.no_registrados !== null) makeTotalRow("No registrados", meta.no_registrados, meta.pct_no_registrados);
-    if (meta.votos_nulos !== null) makeTotalRow("Votos nulos", meta.votos_nulos, meta.pct_nulos);
-    if (meta.total_votos !== null) makeTotalRow("Total votos", meta.total_votos, 100);
   }
 }
 
-function destroyChart(ch){
-  if (ch) ch.destroy();
-}
+/* =========================
+   CHART RENDER
+========================= */
+const chartRegistry = new Map();
 
-function renderChart(dataset, canvasId){
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return null;
+function renderBarChart(canvasId, rows, title) {
+  const canvas = $(canvasId);
+  if (!canvas) return;
 
-  const ctx = canvas.getContext("2d");
-  const labels = dataset.map(d => d.actor);
-  const data = dataset.map(d => d.votos);
-  const colors = dataset.map(d => getActorConfig(d.actor).color);
+  const key = canvasId;
+  if (chartRegistry.has(key)) {
+    chartRegistry.get(key).destroy();
+    chartRegistry.delete(key);
+  }
 
-  return new Chart(ctx, {
+  // Solo filas normales para la gráfica
+  const dataRows = rows.filter((x) => !isSpecialRow(x.actorKey));
+
+  const labels = dataRows.map((r) => r.actor);
+  const data = dataRows.map((r) => (Number.isFinite(r.votos) ? r.votos : 0));
+  const colors = dataRows.map((r) => getActorColor(r.actorKey));
+
+  const chart = new Chart(canvas, {
     type: "bar",
-    data: { labels, datasets: [{ label: "Votos", data, backgroundColor: colors, borderWidth: 0 }] },
+    data: {
+      labels,
+      datasets: [
+        {
+          label: title,
+          data,
+          backgroundColor: colors,
+          borderWidth: 0,
+        },
+      ],
+    },
     options: {
       responsive: true,
-      plugins: { legend: { display: false } },
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ` ${formatInt(ctx.parsed.y)} votos`,
+          },
+        },
+      },
       scales: {
-        x: { ticks: { color: "#475569" }, grid: { color: "rgba(226,232,240,.9)" } },
-        y: { ticks: { color: "#475569" }, grid: { color: "rgba(226,232,240,.9)" } }
-      }
-    }
+        x: {
+          ticks: { maxRotation: 25, minRotation: 0 },
+          grid: { display: false },
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: (v) => formatInt(v),
+          },
+        },
+      },
+    },
+  });
+
+  chartRegistry.set(key, chart);
+}
+
+/* =========================
+   TAB HANDLERS
+========================= */
+function wireTabs({
+  tabAId,
+  tabBId,
+  viewAId,
+  viewBId,
+  onShowA,
+  onShowB,
+}) {
+  const tabA = $(tabAId);
+  const tabB = $(tabBId);
+  const viewA = $(viewAId);
+  const viewB = $(viewBId);
+
+  function showA() {
+    tabA?.classList.add("active");
+    tabB?.classList.remove("active");
+    viewA?.classList.remove("hidden");
+    viewB?.classList.add("hidden");
+    onShowA?.();
+  }
+
+  function showB() {
+    tabB?.classList.add("active");
+    tabA?.classList.remove("active");
+    viewB?.classList.remove("hidden");
+    viewA?.classList.add("hidden");
+    onShowB?.();
+  }
+
+  tabA?.addEventListener("click", showA);
+  tabB?.addEventListener("click", showB);
+
+  // default
+  showA();
+}
+
+/* =========================
+   INIT MODULES
+========================= */
+async function initFederal() {
+  // DF tabs
+  const dfPartidoRows = mapRows(await loadCSV(DATA.federal.df_partido));
+  const dfCandRows = mapRows(await loadCSV(DATA.federal.df_candidatura));
+  const munActaRows = mapRows(await loadCSV(DATA.federal.mun_acta));
+
+  const paintDFPartido = () => {
+    renderTable("df_tbodyPartido", dfPartidoRows);
+    renderBarChart("df_chartPartido", dfPartidoRows, "Votos por Partido");
+  };
+  const paintDFCand = () => {
+    renderTable("df_tbodyCandidatura", dfCandRows);
+    renderBarChart("df_chartCandidatura", dfCandRows, "Votos por Candidatura");
+  };
+
+  wireTabs({
+    tabAId: "df_tabPartido",
+    tabBId: "df_tabCandidatura",
+    viewAId: "df_viewPartido",
+    viewBId: "df_viewCandidatura",
+    onShowA: paintDFPartido,
+    onShowB: paintDFCand,
+  });
+
+  // Municipal general (acta)
+  renderTable("mgen_tbodyActa", munActaRows);
+  renderBarChart("mgen_chartActa", munActaRows, "Votos (Por Acta)");
+}
+
+async function initLocal() {
+  const dlPartidoRows = mapRows(await loadCSV(DATA.local.dl_partido));
+  const dlCandRows = mapRows(await loadCSV(DATA.local.dl_candidatura));
+  const munActaRows = mapRows(await loadCSV(DATA.local.mun_acta));
+
+  const paintDLPartido = () => {
+    renderTable("ldl_tbodyPartido", dlPartidoRows);
+    renderBarChart("ldl_chartPartido", dlPartidoRows, "Votos por Partido");
+  };
+  const paintDLCand = () => {
+    renderTable("ldl_tbodyCandidatura", dlCandRows);
+    renderBarChart("ldl_chartCandidatura", dlCandRows, "Votos por Candidatura");
+  };
+
+  wireTabs({
+    tabAId: "ldl_tabPartido",
+    tabBId: "ldl_tabCandidatura",
+    viewAId: "ldl_viewPartido",
+    viewBId: "ldl_viewCandidatura",
+    onShowA: paintDLPartido,
+    onShowB: paintDLCand,
+  });
+
+  renderTable("lmgen_tbodyActa", munActaRows);
+  renderBarChart("lmgen_chartActa", munActaRows, "Votos (Por Acta)");
+}
+
+async function initMunicipio() {
+  const pRows = mapRows(await loadCSV(DATA.municipio.partido));
+  const cRows = mapRows(await loadCSV(DATA.municipio.candidatura));
+
+  const paintP = () => {
+    renderTable("mun_tbodyPartido", pRows);
+    renderBarChart("mun_chartPartido", pRows, "Votos por Partido");
+  };
+  const paintC = () => {
+    renderTable("mun_tbodyCandidatura", cRows);
+    renderBarChart("mun_chartCandidatura", cRows, "Votos por Candidatura");
+  };
+
+  wireTabs({
+    tabAId: "mun_tabPartido",
+    tabBId: "mun_tabCandidatura",
+    viewAId: "mun_viewPartido",
+    viewBId: "mun_viewCandidatura",
+    onShowA: paintP,
+    onShowB: paintC,
   });
 }
 
-// ========================
-// FEDERAL DF: tabs Partido/Candidatura (IDs df_*)
-// ========================
-function initFederalDF(){
-  const tabP = document.getElementById("df_tabPartido");
-  const tabC = document.getElementById("df_tabCandidatura");
-  const viewP = document.getElementById("df_viewPartido");
-  const viewC = document.getElementById("df_viewCandidatura");
-
-  let chartP = null;
-  let chartC = null;
-
-  function setActive(which){
-    if (which === "P"){
-      tabP?.classList.add("active");
-      tabC?.classList.remove("active");
-      viewP?.classList.remove("hidden");
-      viewC?.classList.add("hidden");
-    } else {
-      tabC?.classList.add("active");
-      tabP?.classList.remove("active");
-      viewC?.classList.remove("hidden");
-      viewP?.classList.add("hidden");
-    }
+/* =========================
+   BOOT
+========================= */
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    // Inicializa TODO (Federal/Local/Municipio) para que al cambiar módulo ya esté listo.
+    await initFederal();
+    await initLocal();
+    await initMunicipio();
+  } catch (err) {
+    console.error(err);
+    alert("No se pudieron cargar los resultados. Revisa nombres/rutas de CSV y consola.");
   }
-
-  async function loadPartido(){
-    const rows = await parseCSV(DATASETS.federal_df.partido);
-    const { dataset } = toDatasetWithMeta(rows);
-    renderTabla(dataset, "df_tbodyPartido");
-    destroyChart(chartP);
-    chartP = renderChart(dataset, "df_chartPartido");
-  }
-
-  async function loadCandidatura(){
-    const rows = await parseCSV(DATASETS.federal_df.candidatura);
-    const { dataset } = toDatasetWithMeta(rows);
-    renderTabla(dataset, "df_tbodyCandidatura");
-    destroyChart(chartC);
-    chartC = renderChart(dataset, "df_chartCandidatura");
-  }
-
-  tabP?.addEventListener("click", async () => { setActive("P"); await loadPartido(); });
-  tabC?.addEventListener("click", async () => { setActive("C"); await loadCandidatura(); });
-
-  return { init: async () => { setActive("P"); await loadPartido(); } };
-}
-
-// ========================
-// FEDERAL Municipio General: Acta (IDs mgen_*)
-// ========================
-function initFederalMunGeneralActa(){
-  let chart = null;
-
-  async function load(){
-    const rows = await parseCSV(DATASETS.federal_mun_general.acta);
-    const { dataset, meta } = toDatasetWithMeta(rows);
-
-    renderTabla(dataset, "mgen_tbodyActa", meta);
-    destroyChart(chart);
-    chart = renderChart(dataset, "mgen_chartActa");
-  }
-
-  return { init: async () => load() };
-}
-
-async function init(){
-  try{
-    // 1) Cargar DF por defecto (esto llena tu tabla y gráfica)
-    const df = initFederalDF();
-    await df.init();
-
-    // 2) Preparar municipio general (solo se verá cuando el selector cambie a mgen)
-    const mgen = initFederalMunGeneralActa();
-    await mgen.init();
-  }catch(e){
-    console.error("Error cargando resultados:", e);
-    // Si quieres, aquí puedes mostrar un mensaje en pantalla en vez de alert.
-  }
-}
-
-init();
+});
