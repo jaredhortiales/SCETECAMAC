@@ -1,7 +1,7 @@
 // Requiere: Chart.js + PapaParse + getActorConfig(actor) en config_partidos.js
 
 const DATASETS = {
-  // ===== FEDERAL =====
+  // FEDERAL
   federal_df: {
     partido: "data/FEDERAL_DF_POR_PARTIDO.csv",
     candidatura: "data/FEDERAL_DF_POR_CANDIDATURA.csv"
@@ -10,7 +10,7 @@ const DATASETS = {
     acta: "data/FEDERAL_MUN_POR_ACTA.csv"
   },
 
-  // ===== LOCAL (DIPUTACIONES LOCALES) =====
+  // LOCAL (cuando subas los CSV)
   local_dl: {
     partido: "data/LOCAL_DL_POR_PARTIDO.csv",
     candidatura: "data/LOCAL_DL_POR_CANDIDATURA.csv"
@@ -19,7 +19,7 @@ const DATASETS = {
     acta: "data/LOCAL_MUN_POR_ACTA.csv"
   },
 
-  // ===== MUNICIPIO (AYUNTAMIENTO) =====
+  // MUNICIPIO (Ayuntamiento)
   municipio: {
     partido: "data/MUNICIPIO_POR_PARTIDO.csv",
     candidatura: "data/MUNICIPIO_POR_CANDIDATURA.csv"
@@ -113,7 +113,7 @@ function renderTabla(dataset, tbodyId, meta=null){
   }
 
   for (const row of dataset){
-    const cfg = getActorConfig(row.actor); // Aquí entra NAEM y coaliciones si config_partidos.js las contempla
+    const cfg = getActorConfig(row.actor);
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><img class="logo" src="${cfg.logo}" alt="${row.actor}" onerror="this.style.display='none';" /></td>
@@ -169,98 +169,85 @@ function renderChart(dataset, canvasId){
   });
 }
 
-// ==== 2 tabs genérico (Partido / Candidatura) ====
-function makeTwoTab(prefix, datasetKey){
-  const tabA = document.getElementById(`${prefix}_tabA`);
-  const tabB = document.getElementById(`${prefix}_tabB`);
-  const viewA = document.getElementById(`${prefix}_viewA`);
-  const viewB = document.getElementById(`${prefix}_viewB`);
+// ========================
+// FEDERAL DF: tabs Partido/Candidatura (IDs df_*)
+// ========================
+function initFederalDF(){
+  const tabP = document.getElementById("df_tabPartido");
+  const tabC = document.getElementById("df_tabCandidatura");
+  const viewP = document.getElementById("df_viewPartido");
+  const viewC = document.getElementById("df_viewCandidatura");
 
-  let chartA = null;
-  let chartB = null;
+  let chartP = null;
+  let chartC = null;
 
   function setActive(which){
-    if (which === "A"){
-      tabA?.classList.add("active");
-      tabB?.classList.remove("active");
-      viewA?.classList.remove("hidden");
-      viewB?.classList.add("hidden");
+    if (which === "P"){
+      tabP?.classList.add("active");
+      tabC?.classList.remove("active");
+      viewP?.classList.remove("hidden");
+      viewC?.classList.add("hidden");
     } else {
-      tabB?.classList.add("active");
-      tabA?.classList.remove("active");
-      viewB?.classList.remove("hidden");
-      viewA?.classList.add("hidden");
+      tabC?.classList.add("active");
+      tabP?.classList.remove("active");
+      viewC?.classList.remove("hidden");
+      viewP?.classList.add("hidden");
     }
   }
 
-  async function load(which){
-    try{
-      const key = which === "A" ? "partido" : "candidatura";
-      const url = DATASETS[datasetKey][key];
-      const rows = await parseCSV(url);
-      const { dataset } = toDatasetWithMeta(rows);
-
-      if (which === "A"){
-        renderTabla(dataset, `${prefix}_tbodyA`);
-        destroyChart(chartA);
-        chartA = renderChart(dataset, `${prefix}_chartA`);
-      } else {
-        renderTabla(dataset, `${prefix}_tbodyB`);
-        destroyChart(chartB);
-        chartB = renderChart(dataset, `${prefix}_chartB`);
-      }
-    }catch(e){
-      console.error(e);
-      renderTabla([], which === "A" ? `${prefix}_tbodyA` : `${prefix}_tbodyB`);
-    }
+  async function loadPartido(){
+    const rows = await parseCSV(DATASETS.federal_df.partido);
+    const { dataset } = toDatasetWithMeta(rows);
+    renderTabla(dataset, "df_tbodyPartido");
+    destroyChart(chartP);
+    chartP = renderChart(dataset, "df_chartPartido");
   }
 
-  tabA?.addEventListener("click", async () => { setActive("A"); await load("A"); });
-  tabB?.addEventListener("click", async () => { setActive("B"); await load("B"); });
+  async function loadCandidatura(){
+    const rows = await parseCSV(DATASETS.federal_df.candidatura);
+    const { dataset } = toDatasetWithMeta(rows);
+    renderTabla(dataset, "df_tbodyCandidatura");
+    destroyChart(chartC);
+    chartC = renderChart(dataset, "df_chartCandidatura");
+  }
 
-  return { init: async () => { setActive("A"); await load("A"); } };
+  tabP?.addEventListener("click", async () => { setActive("P"); await loadPartido(); });
+  tabC?.addEventListener("click", async () => { setActive("C"); await loadCandidatura(); });
+
+  return { init: async () => { setActive("P"); await loadPartido(); } };
 }
 
-// ==== Vista única Acta (municipio general) ====
-function makeActa(prefix, datasetKey){
+// ========================
+// FEDERAL Municipio General: Acta (IDs mgen_*)
+// ========================
+function initFederalMunGeneralActa(){
   let chart = null;
 
   async function load(){
-    try{
-      const url = DATASETS[datasetKey].acta;
-      const rows = await parseCSV(url);
-      const { dataset, meta } = toDatasetWithMeta(rows);
+    const rows = await parseCSV(DATASETS.federal_mun_general.acta);
+    const { dataset, meta } = toDatasetWithMeta(rows);
 
-      renderTabla(dataset, `${prefix}_tbodyActa`, meta);
-      destroyChart(chart);
-      chart = renderChart(dataset, `${prefix}_chartActa`);
-    }catch(e){
-      console.error(e);
-      renderTabla([], `${prefix}_tbodyActa`);
-    }
+    renderTabla(dataset, "mgen_tbodyActa", meta);
+    destroyChart(chart);
+    chart = renderChart(dataset, "mgen_chartActa");
   }
 
   return { init: async () => load() };
 }
 
 async function init(){
-  // FEDERAL
-  const fedDF = makeTwoTab("fed_df", "federal_df");
-  await fedDF.init();
+  try{
+    // 1) Cargar DF por defecto (esto llena tu tabla y gráfica)
+    const df = initFederalDF();
+    await df.init();
 
-  const fedMunActa = makeActa("fed_mun", "federal_mun_general");
-  await fedMunActa.init();
-
-  // LOCAL
-  const locDL = makeTwoTab("loc_dl", "local_dl");
-  await locDL.init();
-
-  const locMunActa = makeActa("loc_mun", "local_mun_general");
-  await locMunActa.init();
-
-  // MUNICIPIO (Ayuntamiento): Partido/Candidatura
-  const mun = makeTwoTab("mun", "municipio");
-  await mun.init();
+    // 2) Preparar municipio general (solo se verá cuando el selector cambie a mgen)
+    const mgen = initFederalMunGeneralActa();
+    await mgen.init();
+  }catch(e){
+    console.error("Error cargando resultados:", e);
+    // Si quieres, aquí puedes mostrar un mensaje en pantalla en vez de alert.
+  }
 }
 
 init();
