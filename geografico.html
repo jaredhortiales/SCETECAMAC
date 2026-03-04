@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SCETECAMAC | Información Geográfica</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <div>
+        <div class="title">SCETECAMAC</div>
+        <div class="subtitle">Información Geográfica Electoral</div>
+      </div>
+    </div>
+    <div class="chip">Tecámac</div>
+  </header>
+
+  <main class="container">
+
+    <section class="card">
+      <div class="cardHeader">
+        <h2>Panel Geográfico</h2>
+        <span class="pill">Mapas y Bases</span>
+      </div>
+
+      <label class="label">Módulo</label>
+      <select id="geoModuleSelect" class="select">
+        <option value="federal">Diputaciones Federales (DF 20)</option>
+        <option value="local">Diputaciones Locales (DL 22)</option>
+        <option value="municipio">Municipio / Tecámac</option>
+      </select>
+
+      <div class="tabs" style="margin-top:12px;">
+        <button id="tabSecciones" class="tab active">Secciones</button>
+        <button id="tabColonias" class="tab">Colonias</button>
+        <button id="tabPlanos" class="tab">Planos (Drive)</button>
+      </div>
+
+      <p class="hint" style="margin-top:10px;">
+        <a href="index.html" style="text-decoration:none;">← Volver a Inicio</a>
+      </p>
+    </section>
+
+    <!-- SECCIONES -->
+    <section id="viewSecciones" class="card">
+      <div class="cardHeader">
+        <h2>Secciones</h2>
+        <span id="seccionesPill" class="pill">DF20</span>
+      </div>
+
+      <label class="label">Buscar (sección, municipio, distrito)</label>
+      <input id="searchSecciones" class="select" style="height:44px;" placeholder="Ej. 4235, TECAMAC, 20, 22..." />
+
+      <div class="tableWrap" style="margin-top:12px;">
+        <table class="resultsTable">
+          <thead id="seccionesThead"></thead>
+          <tbody id="seccionesTbody"></tbody>
+        </table>
+      </div>
+
+      <div id="seccionesErr" class="err"></div>
+    </section>
+
+    <!-- COLONIAS -->
+    <section id="viewColonias" class="card hidden">
+      <div class="cardHeader">
+        <h2>Colonias</h2>
+        <span id="coloniasPill" class="pill">DF20</span>
+      </div>
+
+      <label class="label">Buscar (colonia, sección, CP)</label>
+      <input id="searchColonias" class="select" style="height:44px;" placeholder="Ej. HÉROES, 4235, 55700..." />
+
+      <div class="tableWrap" style="margin-top:12px;">
+        <table class="resultsTable">
+          <thead id="coloniasThead"></thead>
+          <tbody id="coloniasTbody"></tbody>
+        </table>
+      </div>
+
+      <div id="coloniasErr" class="err"></div>
+    </section>
+
+    <!-- PLANOS -->
+    <section id="viewPlanos" class="card hidden">
+      <div class="cardHeader">
+        <h2>Planos</h2>
+        <span id="planosPill" class="pill">DF20</span>
+      </div>
+
+      <p class="hint">
+        Por el peso de los PDFs, el sistema usa enlaces de Drive. Si Drive no permite previsualización, se abre como descarga.
+      </p>
+
+      <div class="tableWrap" style="margin-top:12px;">
+        <table class="resultsTable">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Nombre</th>
+              <th class="num">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="planosTbody"></tbody>
+        </table>
+      </div>
+
+      <div id="planosErr" class="err"></div>
+    </section>
+
+  </main>
+
+  <script src="js/geografico.js"></script>
+</body>
+</html>
