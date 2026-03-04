@@ -40,7 +40,7 @@
           <select id="selModulo">
             <option value="federal" selected>Diputaciones Federales</option>
             <option value="local">Diputaciones Locales (próximamente)</option>
-            <option value="municipal">Ayuntamientos (próximamente)</option>
+            <option value="municipal">Municipio (próximamente)</option>
           </select>
         </div>
       </div>
@@ -51,7 +51,7 @@
     </section>
 
     <!-- =========================================================
-         PANTALLA: FEDERAL
+         PANTALLA: FEDERAL (SOLO DF + MUNICIPIO GENERAL ACTA)
     ========================================================== -->
     <section class="panel" id="screen_federal">
       <div class="section-title">
@@ -59,14 +59,12 @@
         <div class="badge">Resultados</div>
       </div>
 
-      <!-- Submenú federal -->
       <div class="filters" style="margin-top: 12px;">
         <div class="filter">
           <label for="selFederalVista">Nivel</label>
           <select id="selFederalVista">
             <option value="df" selected>Por Distrito Federal (Partido / Candidatura)</option>
             <option value="mgen">Por Municipio (General) · Por Acta</option>
-            <option value="tecamac">Municipio individual (82. Tecámac)</option>
           </select>
         </div>
       </div>
@@ -83,7 +81,6 @@
           <button class="tab" id="df_tabCandidatura" type="button">Por Candidatura</button>
         </div>
 
-        <!-- DF · Partido -->
         <div class="view" id="df_viewPartido">
           <div class="table-wrap">
             <table class="results">
@@ -105,7 +102,6 @@
           </div>
         </div>
 
-        <!-- DF · Candidatura -->
         <div class="view hidden" id="df_viewCandidatura">
           <div class="table-wrap">
             <table class="results">
@@ -161,77 +157,10 @@
         </div>
       </div>
 
-      <!-- ===== FEDERAL: TECÁMAC (MUNICIPIO INDIVIDUAL) ===== -->
-      <div id="federal_view_tecamac" class="hidden" style="margin-top: 14px;">
-        <div class="section-title">
-          <h3 style="margin:0;">Federal · Municipio individual</h3>
-          <div class="badge">82. Tecámac</div>
-        </div>
-
-        <!-- Si solo será Tecámac, dejamos el select bloqueado -->
-        <div class="filters" style="margin-top: 10px;">
-          <div class="filter">
-            <label for="mun_selMunicipio">Municipio</label>
-            <select id="mun_selMunicipio" disabled>
-              <option value="TECAMAC" selected>82. Tecámac</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="tabs">
-          <button class="tab active" id="mun_tabPartido" type="button">Por Partido</button>
-          <button class="tab" id="mun_tabCandidatura" type="button">Por Candidatura</button>
-        </div>
-
-        <!-- Tecámac · Partido -->
-        <div class="view" id="mun_viewPartido">
-          <div class="table-wrap">
-            <table class="results">
-              <thead>
-                <tr>
-                  <th>Logo</th>
-                  <th>Actor Político</th>
-                  <th class="num">Votos</th>
-                  <th class="num">% de la votación</th>
-                </tr>
-              </thead>
-              <tbody id="mun_tbodyPartido"></tbody>
-            </table>
-          </div>
-
-          <div class="chart-wrap">
-            <h3>Gráfica (Votos por Partido · Tecámac)</h3>
-            <canvas id="mun_chartPartido" height="110"></canvas>
-          </div>
-        </div>
-
-        <!-- Tecámac · Candidatura -->
-        <div class="view hidden" id="mun_viewCandidatura">
-          <div class="table-wrap">
-            <table class="results">
-              <thead>
-                <tr>
-                  <th>Logo</th>
-                  <th>Actor Político</th>
-                  <th class="num">Votos</th>
-                  <th class="num">% de la votación</th>
-                </tr>
-              </thead>
-              <tbody id="mun_tbodyCandidatura"></tbody>
-            </table>
-          </div>
-
-          <div class="chart-wrap">
-            <h3>Gráfica (Votos por Candidatura · Tecámac)</h3>
-            <canvas id="mun_chartCandidatura" height="110"></canvas>
-          </div>
-        </div>
-      </div>
-
     </section>
 
     <!-- =========================================================
-         PANTALLA: LOCAL (POR AHORA SOLO MENSAJE)
+         PANTALLA: LOCAL
     ========================================================== -->
     <section class="panel hidden" id="screen_local">
       <div class="section-title">
@@ -239,20 +168,20 @@
         <div class="badge">Próximamente</div>
       </div>
       <p class="muted" style="margin-top:10px;">
-        Este módulo se habilitará cuando subas los CSV locales (distrito local y municipio).
+        Se habilitará cuando subas los CSV locales.
       </p>
     </section>
 
     <!-- =========================================================
-         PANTALLA: MUNICIPAL (AYUNTAMIENTOS) (POR AHORA SOLO MENSAJE)
+         PANTALLA: MUNICIPAL
     ========================================================== -->
     <section class="panel hidden" id="screen_municipal">
       <div class="section-title">
-        <h2>Ayuntamientos</h2>
+        <h2>Municipio</h2>
         <div class="badge">Próximamente</div>
       </div>
       <p class="muted" style="margin-top:10px;">
-        Este módulo se habilitará cuando subas los CSV de ayuntamientos por municipio.
+        Aquí irá la función municipal (incluyendo Tecámac como selector).
       </p>
     </section>
 
@@ -262,11 +191,9 @@
     <span class="muted">SCETECAMAC · Visor Electoral</span>
   </footer>
 
-  <!-- Scripts -->
   <script src="js/config_partidos.js"></script>
   <script src="js/resultados.js"></script>
 
-  <!-- Control de pantallas (módulos) y vistas internas -->
   <script>
     const selModulo = document.getElementById("selModulo");
     const screenFederal = document.getElementById("screen_federal");
@@ -276,7 +203,6 @@
     const selFederalVista = document.getElementById("selFederalVista");
     const viewDF = document.getElementById("federal_view_df");
     const viewMGen = document.getElementById("federal_view_mgen");
-    const viewTec = document.getElementById("federal_view_tecamac");
 
     function showScreen(screen){
       screenFederal.classList.add("hidden");
@@ -291,25 +217,16 @@
     function showFederalView(which){
       viewDF.classList.add("hidden");
       viewMGen.classList.add("hidden");
-      viewTec.classList.add("hidden");
 
       if (which === "df") viewDF.classList.remove("hidden");
       if (which === "mgen") viewMGen.classList.remove("hidden");
-      if (which === "tecamac") viewTec.classList.remove("hidden");
     }
 
-    selModulo.addEventListener("change", (e) => {
-      showScreen(e.target.value);
-    });
+    selModulo.addEventListener("change", (e) => showScreen(e.target.value));
+    selFederalVista.addEventListener("change", (e) => showFederalView(e.target.value));
 
-    selFederalVista.addEventListener("change", (e) => {
-      showFederalView(e.target.value);
-    });
-
-    // Inicial
     showScreen("federal");
     showFederalView("df");
   </script>
 </body>
 </html>
-
