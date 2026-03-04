@@ -7,17 +7,14 @@
 
   <link rel="stylesheet" href="css/styles.css" />
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-  <!-- PapaParse (CSV) -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 
 <body>
   <header class="topbar">
     <div class="brand">
-      <div class="brand-dot"></div>
+      <div class="brand-mark"></div>
       <div>
         <div class="brand-title">SCETECAMAC</div>
         <div class="brand-subtitle">Visor Electoral · Resultados</div>
@@ -29,78 +26,185 @@
     <section class="panel">
       <h1>Resultados Electorales</h1>
       <p class="muted">
-        Apartado inicial: <b>Diputaciones Federales</b>. Se muestran dos vistas:
-        <b>Por Partido</b> y <b>Por Candidatura</b>. Cada vista incluye tabla con logotipos
-        y su gráfica correspondiente.
+        Módulo inicial: <b>Diputaciones Federales</b>. Las secciones se organizan en paneles
+        <b>desplegables</b> para escalar después a <b>Diputaciones Locales</b>, <b>Ayuntamientos</b> y <b>Mapas</b>.
       </p>
     </section>
 
-    <section class="panel">
-      <div class="section-title">
-        <h2>Diputaciones Federales</h2>
-        <div class="badge">Resultados</div>
-      </div>
+    <!-- =========================================
+         DIPUTACIONES FEDERALES (DESPLEGABLE)
+    ========================================== -->
+    <details class="accordion" open>
+      <summary>
+        <span class="acc-title">Diputaciones Federales</span>
+        <span class="acc-sub">Resultados por Distrito Federal y por Municipio</span>
+      </summary>
 
-      <div class="tabs">
-        <button class="tab active" id="tabPartido" type="button">Federal · Por Partido</button>
-        <button class="tab" id="tabCandidatura" type="button">Federal · Por Candidatura</button>
-      </div>
-
-      <!-- VISTA 1: POR PARTIDO -->
-      <div class="view" id="viewPartido">
-        <h3 class="view-title">Resultados por Partido</h3>
-
-        <div class="table-wrap">
-          <table class="results">
-            <thead>
-              <tr>
-                <th>Logo</th>
-                <th>Actor Político</th>
-                <th class="num">Votos</th>
-                <th class="num">% de la votación</th>
-              </tr>
-            </thead>
-            <tbody id="tbodyPartido"></tbody>
-          </table>
+      <!-- ====== Federales por Distrito Federal ====== -->
+      <div class="panel inner">
+        <div class="section-title">
+          <h2>Federal · Por Distrito Federal</h2>
+          <div class="badge">DF</div>
         </div>
 
-        <div class="chart-wrap">
-          <h3>Gráfica (Votos por Partido)</h3>
-          <canvas id="chartPartido" height="110"></canvas>
+        <div class="tabs">
+          <button class="tab active" id="df_tabPartido" type="button">Por Partido</button>
+          <button class="tab" id="df_tabCandidatura" type="button">Por Candidatura</button>
+        </div>
+
+        <!-- DF · Partido -->
+        <div class="view" id="df_viewPartido">
+          <div class="table-wrap">
+            <table class="results">
+              <thead>
+                <tr>
+                  <th>Logo</th>
+                  <th>Actor Político</th>
+                  <th class="num">Votos</th>
+                  <th class="num">% de la votación</th>
+                </tr>
+              </thead>
+              <tbody id="df_tbodyPartido"></tbody>
+            </table>
+          </div>
+
+          <div class="chart-wrap">
+            <h3>Gráfica (Votos por Partido)</h3>
+            <canvas id="df_chartPartido" height="110"></canvas>
+          </div>
+        </div>
+
+        <!-- DF · Candidatura -->
+        <div class="view hidden" id="df_viewCandidatura">
+          <div class="table-wrap">
+            <table class="results">
+              <thead>
+                <tr>
+                  <th>Logo</th>
+                  <th>Actor Político</th>
+                  <th class="num">Votos</th>
+                  <th class="num">% de la votación</th>
+                </tr>
+              </thead>
+              <tbody id="df_tbodyCandidatura"></tbody>
+            </table>
+          </div>
+
+          <div class="chart-wrap">
+            <h3>Gráfica (Votos por Candidatura)</h3>
+            <canvas id="df_chartCandidatura" height="110"></canvas>
+          </div>
         </div>
       </div>
 
-      <!-- VISTA 2: POR CANDIDATURA -->
-      <div class="view hidden" id="viewCandidatura">
-        <h3 class="view-title">Resultados por Candidatura</h3>
-
-        <div class="table-wrap">
-          <table class="results">
-            <thead>
-              <tr>
-                <th>Logo</th>
-                <th>Actor Político</th>
-                <th class="num">Votos</th>
-                <th class="num">% de la votación</th>
-              </tr>
-            </thead>
-            <tbody id="tbodyCandidatura"></tbody>
-          </table>
+      <!-- ====== Federales por Municipio (Tecámac) ====== -->
+      <div class="panel inner">
+        <div class="section-title">
+          <h2>Federal · Por Municipio</h2>
+          <div class="badge">Municipio</div>
         </div>
 
-        <div class="chart-wrap">
-          <h3>Gráfica (Votos por Candidatura)</h3>
-          <canvas id="chartCandidatura" height="110"></canvas>
+        <div class="filters">
+          <div class="filter">
+            <label for="mun_selMunicipio">Municipio</label>
+            <select id="mun_selMunicipio">
+              <option value="TECAMAC" selected>Tecámac</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" id="mun_tabPartido" type="button">Por Partido</button>
+          <button class="tab" id="mun_tabCandidatura" type="button">Por Candidatura</button>
+        </div>
+
+        <!-- Municipio · Partido -->
+        <div class="view" id="mun_viewPartido">
+          <div class="table-wrap">
+            <table class="results">
+              <thead>
+                <tr>
+                  <th>Logo</th>
+                  <th>Actor Político</th>
+                  <th class="num">Votos</th>
+                  <th class="num">% de la votación</th>
+                </tr>
+              </thead>
+              <tbody id="mun_tbodyPartido"></tbody>
+            </table>
+          </div>
+
+          <div class="chart-wrap">
+            <h3>Gráfica (Votos por Partido · Tecámac)</h3>
+            <canvas id="mun_chartPartido" height="110"></canvas>
+          </div>
+        </div>
+
+        <!-- Municipio · Candidatura -->
+        <div class="view hidden" id="mun_viewCandidatura">
+          <div class="table-wrap">
+            <table class="results">
+              <thead>
+                <tr>
+                  <th>Logo</th>
+                  <th>Actor Político</th>
+                  <th class="num">Votos</th>
+                  <th class="num">% de la votación</th>
+                </tr>
+              </thead>
+              <tbody id="mun_tbodyCandidatura"></tbody>
+            </table>
+          </div>
+
+          <div class="chart-wrap">
+            <h3>Gráfica (Votos por Candidatura · Tecámac)</h3>
+            <canvas id="mun_chartCandidatura" height="110"></canvas>
+          </div>
         </div>
       </div>
-    </section>
+    </details>
+
+    <!-- =========================================
+         DIPUTACIONES LOCALES (DESPLEGABLE - LISTO PARA CONECTAR DESPUÉS)
+    ========================================== -->
+    <details class="accordion">
+      <summary>
+        <span class="acc-title">Diputaciones Locales</span>
+        <span class="acc-sub">Se habilitará con CSV locales (por distrito local y municipio)</span>
+      </summary>
+
+      <div class="panel inner">
+        <p class="muted">
+          Este apartado ya está contemplado. En cuanto subas los CSV de resultados locales,
+          replicamos la misma lógica: tabla con logos + gráfica, con paneles desplegables.
+        </p>
+      </div>
+    </details>
+
+    <!-- =========================================
+         AYUNTAMIENTOS (DESPLEGABLE - LISTO PARA CONECTAR DESPUÉS)
+    ========================================== -->
+    <details class="accordion">
+      <summary>
+        <span class="acc-title">Ayuntamientos</span>
+        <span class="acc-sub">Se habilitará con CSV por municipio</span>
+      </summary>
+
+      <div class="panel inner">
+        <p class="muted">
+          Este apartado también queda preparado. Posteriormente conectamos CSV de ayuntamientos
+          (por partido y por candidatura), y después lo enlazamos con la pantalla de mapas.
+        </p>
+      </div>
+    </details>
+
   </main>
 
   <footer class="footer">
-    <span class="muted">SCETECAMAC · Módulo de Resultados Electorales</span>
+    <span class="muted">SCETECAMAC · Visor Electoral</span>
   </footer>
 
   <script src="js/config_partidos.js"></script>
-  <script src="js/resultados_federales.js"></script>
+  <script src="js/resultados.js"></script>
 </body>
 </html>
