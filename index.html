@@ -7,7 +7,7 @@
 
   <link rel="stylesheet" href="css/styles.css" />
 
-  <!-- Librerías -->
+  <!-- Librerías (primero) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
@@ -25,11 +25,9 @@
 
   <main class="container">
 
-    <!-- =========================
-         MENU PRINCIPAL (MÓDULOS)
-    ========================== -->
+    <!-- PANEL PRINCIPAL -->
     <section class="panel">
-      <div class="section-title" style="margin-bottom: 10px;">
+      <div class="section-title" style="margin-bottom:10px;">
         <h1>Panel de Resultados</h1>
         <div class="badge">Tecámac</div>
       </div>
@@ -40,7 +38,7 @@
           <select id="selModulo">
             <option value="federal" selected>Diputaciones Federales</option>
             <option value="local">Diputaciones Locales (próximamente)</option>
-            <option value="municipal">Municipio (próximamente)</option>
+            <option value="municipio">Municipio / Ayuntamiento (próximamente)</option>
           </select>
         </div>
       </div>
@@ -50,16 +48,16 @@
       </p>
     </section>
 
-    <!-- =========================================================
-         PANTALLA: FEDERAL (SOLO DF + MUNICIPIO GENERAL ACTA)
-    ========================================================== -->
+    <!-- =========================
+         PANTALLA: FEDERAL
+    ========================== -->
     <section class="panel" id="screen_federal">
       <div class="section-title">
         <h2>Diputaciones Federales</h2>
         <div class="badge">Resultados</div>
       </div>
 
-      <div class="filters" style="margin-top: 12px;">
+      <div class="filters" style="margin-top:12px;">
         <div class="filter">
           <label for="selFederalVista">Nivel</label>
           <select id="selFederalVista">
@@ -69,8 +67,8 @@
         </div>
       </div>
 
-      <!-- ===== FEDERAL: DISTRITO FEDERAL ===== -->
-      <div id="federal_view_df" style="margin-top: 14px;">
+      <!-- ===== VISTA DF ===== -->
+      <div id="federal_view_df" style="margin-top:14px;">
         <div class="section-title">
           <h3 style="margin:0;">Federal · Por Distrito Federal</h3>
           <div class="badge">DF</div>
@@ -124,8 +122,8 @@
         </div>
       </div>
 
-      <!-- ===== FEDERAL: MUNICIPIO GENERAL (ACTA) ===== -->
-      <div id="federal_view_mgen" class="hidden" style="margin-top: 14px;">
+      <!-- ===== VISTA MUNICIPIO GENERAL (ACTA) ===== -->
+      <div id="federal_view_mgen" class="hidden" style="margin-top:14px;">
         <div class="section-title">
           <h3 style="margin:0;">Federal · Por Municipio (General)</h3>
           <div class="badge">Acta</div>
@@ -156,33 +154,24 @@
           </div>
         </div>
       </div>
-
     </section>
 
-    <!-- =========================================================
-         PANTALLA: LOCAL
-    ========================================================== -->
+    <!-- PANTALLA: LOCAL -->
     <section class="panel hidden" id="screen_local">
       <div class="section-title">
         <h2>Diputaciones Locales</h2>
         <div class="badge">Próximamente</div>
       </div>
-      <p class="muted" style="margin-top:10px;">
-        Se habilitará cuando subas los CSV locales.
-      </p>
+      <p class="muted" style="margin-top:10px;">Se habilitará al subir los CSV locales.</p>
     </section>
 
-    <!-- =========================================================
-         PANTALLA: MUNICIPAL
-    ========================================================== -->
-    <section class="panel hidden" id="screen_municipal">
+    <!-- PANTALLA: MUNICIPIO -->
+    <section class="panel hidden" id="screen_municipio">
       <div class="section-title">
-        <h2>Municipio</h2>
+        <h2>Municipio / Ayuntamiento</h2>
         <div class="badge">Próximamente</div>
       </div>
-      <p class="muted" style="margin-top:10px;">
-        Aquí irá la función municipal (incluyendo Tecámac como selector).
-      </p>
+      <p class="muted" style="margin-top:10px;">Se habilitará al subir los CSV municipales.</p>
     </section>
 
   </main>
@@ -191,14 +180,16 @@
     <span class="muted">SCETECAMAC · Visor Electoral</span>
   </footer>
 
+  <!-- Tus scripts (en este orden) -->
   <script src="js/config_partidos.js"></script>
   <script src="js/resultados.js"></script>
 
+  <!-- Control de pantallas / vistas -->
   <script>
     const selModulo = document.getElementById("selModulo");
     const screenFederal = document.getElementById("screen_federal");
     const screenLocal = document.getElementById("screen_local");
-    const screenMunicipal = document.getElementById("screen_municipal");
+    const screenMunicipio = document.getElementById("screen_municipio");
 
     const selFederalVista = document.getElementById("selFederalVista");
     const viewDF = document.getElementById("federal_view_df");
@@ -207,17 +198,16 @@
     function showScreen(screen){
       screenFederal.classList.add("hidden");
       screenLocal.classList.add("hidden");
-      screenMunicipal.classList.add("hidden");
+      screenMunicipio.classList.add("hidden");
 
       if (screen === "federal") screenFederal.classList.remove("hidden");
       if (screen === "local") screenLocal.classList.remove("hidden");
-      if (screen === "municipal") screenMunicipal.classList.remove("hidden");
+      if (screen === "municipio") screenMunicipio.classList.remove("hidden");
     }
 
     function showFederalView(which){
       viewDF.classList.add("hidden");
       viewMGen.classList.add("hidden");
-
       if (which === "df") viewDF.classList.remove("hidden");
       if (which === "mgen") viewMGen.classList.remove("hidden");
     }
